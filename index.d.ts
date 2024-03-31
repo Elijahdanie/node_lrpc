@@ -73,7 +73,9 @@ declare function initLRPC (
       queueHost: string;
       redis: { host: string; port: number };
     },
-    authorize: (token: string, role: string[]) => any
+    authorize: (token: string, role: string[]) => any,
+    controllers,
+    Container
   ): LRPCEngine;
 
 declare function LRPCFunction 
@@ -83,4 +85,4 @@ declare function LRPCFunction
     response: any
   ): (target: any, name: string, descriptor: PropertyDescriptor) => void;
 
-export {LRPCEngine, LRPCAuth, LRPCPayload, initLRPC, LRPCFunction}
+export {LRPCEngine, LRPCAuth, BaseResponse, LRPCPayload, initLRPC, LRPCFunction}
