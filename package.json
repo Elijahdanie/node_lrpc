@@ -7,6 +7,9 @@
   "scripts": {
     "test": "node ./test/service.js"
   },
+  "bin": {
+    "lrpc": "./bin/cli.js"
+  },
   "keywords": [],
   "author": "Elijah Daniel",
   "license": "ISC",

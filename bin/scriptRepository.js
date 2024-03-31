@@ -1,4 +1,3 @@
-const { LRPCEngine } = require("..");
 const fs = require('fs');
 const { Redis } = require("ioredis");
 

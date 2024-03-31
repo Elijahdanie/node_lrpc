@@ -1,6 +1,5 @@
 const path = require("path");
 const fs = require("fs");
-const Container = require("typedi");
 const { RabbitMq } = require("./rabbitmq");
 const { Redis } = require("ioredis");
 
@@ -13,6 +12,7 @@ const {typeLibrary,
 
 class LRPCEngine {
 service;
+container;
 url;
 handlers = {};
 clientHandlers = {};
@@ -27,7 +27,8 @@ constructor(
   authorize,
   url,
   queueHost,
-  redis
+  redis,
+  Container
 ) {
   if (LRPCEngine.instance) {
     throw new Error("Cannot create multiple instances of LRPCEngine");
@@ -45,6 +46,7 @@ constructor(
   this.authorize = authorize;
   LRPCEngine.instance = this;
   LRPCEngine.trackInstance++;
+  this.container = Container;
   // console.log('CREATED INSTANCE');
 }
 
@@ -168,61 +170,73 @@ processRequest = async (req, res) => {
   }
 };
 
-processClientControllers = async () => {
-  const controllerPath = `./src/serviceClients`;
+// processClientControllers = async () => {
+//   const controllerPath = `./src/serviceClients`;
 
-  if(!fs.existsSync(controllerPath)){
-      return;
-  }
-  const fileContents = fs.readdirSync(controllerPath);
+//   if(!fs.existsSync(controllerPath)){
+//       return;
+//   }
+//   const fileContents = fs.readdirSync(controllerPath);
 
-  await Promise.all(
-    fileContents.map(async (data) => {
-      const targetPath = `${controllerPath}/${data}`;
-      // console.log(targetPath);
-      const fileName = data.split(".")[0];
-      if (fileName !== this.service) {
-        const dynamicImport = await import(path.resolve(targetPath));
-        Object.keys(dynamicImport).forEach((key) => {
-          // console.log(controller);
-          if (!["request", "queue"].includes(key)) {
-            Object.keys(dynamicImport[key]).map((endpoint) => {
-              const methodKey = `${fileName}.${key}.${endpoint}`;
-              // console.log(dynamicImport[key][endpoint]);
-              this.clientHandlers[methodKey] =
-                dynamicImport[key][endpoint].request;
-            });
-          }
-        });
-      }
-    })
-  );
+//   await Promise.all(
+//     fileContents.map(async (data) => {
+//       const targetPath = `${controllerPath}/${data}`;
+//       // console.log(targetPath);
+//       const fileName = data.split(".")[0];
+//       if (fileName !== this.service) {
+//         const dynamicImport = await import(path.resolve(targetPath));
+//         Object.keys(dynamicImport).forEach((key) => {
+//           // console.log(controller);
+//           if (!["request", "queue"].includes(key)) {
+//             Object.keys(dynamicImport[key]).map((endpoint) => {
+//               const methodKey = `${fileName}.${key}.${endpoint}`;
+//               // console.log(dynamicImport[key][endpoint]);
+//               this.clientHandlers[methodKey] =
+//                 dynamicImport[key][endpoint].request;
+//             });
+//           }
+//         });
+//       }
+//     })
+//   );
+// };
+
+processControllers = async (controllers) => {
+  // console.log(controllers);
+  await Promise.all(Object.keys(controllers).map(async (controller) => {
+    
+    controllers[controller].forEach(async (endpoint) => {
+      // const methodKey = `${this.service}.${controller}.${endpoint.name}`;
+      // console.log(endpoint.name);
+      LRPCEngine.instance.container.set(endpoint.name, new endpoint());
+    });
+  }));
 };
 
-processControllers = async () => {
-  const controllerPath = `./src/controllers`;
-  const fileContents = fs.readdirSync(controllerPath);
+// processControllers = async () => {
+//   const controllerPath = `./src/controllers`;
+//   const fileContents = fs.readdirSync(controllerPath);
 
-  // make a dynamic import
+//   // make a dynamic import
 
-  // console.log(fileContents);
+//   // console.log(fileContents);
 
-  await Promise.all(
-    fileContents.map(async (data) => {
-      const targetPath = `${controllerPath}/${data}/index.ts`;
-      const dynamicImport = await import(path.resolve(targetPath));
-      // console.log(dynamicImport[`${data}Controller`]);
-      const endpoints = dynamicImport[`${data}Controller`];
-      endpoints.forEach((endpoint) => {
-        Container.set(endpoint.name, new endpoint());
-        // const check = Container.get(endpoint.name);
-        // console.log(endpoint.name, check);
-      });
-    })
-  );
+//   await Promise.all(
+//     fileContents.map(async (data) => {
+//       const targetPath = `${controllerPath}/${data}/index.ts`;
+//       const dynamicImport = await import(path.resolve(targetPath));
+//       // console.log(dynamicImport[`${data}Controller`]);
+//       const endpoints = dynamicImport[`${data}Controller`];
+//       endpoints.forEach((endpoint) => {
+//         Container.set(endpoint.name, new endpoint());
+//         // const check = Container.get(endpoint.name);
+//         // console.log(endpoint.name, check);
+//       });
+//     })
+//   );
 
-  // console.log('instance', LRPCEngine.trackInstance);
-};
+//   // console.log('instance', LRPCEngine.trackInstance);
+// };
 
 static getParameterNames(func) {
   const match = func.toString().match(/^async\s*\w+\s*\((.*?)\)/);
@@ -296,21 +310,23 @@ const LRPCPayload =
 
 const initLRPC = (
 config,
-authorize
+authorize,
+controllers,
+Container
 ) => {
 const { service, app, port, hostname } = config;
 const url = hostname
   ? `https://${hostname}/lrpc`
   : `http://localhost:${port}/lrpc`;
-const LRPC = new LRPCEngine(service, authorize, url, config.queueHost, config.redis);
-LRPC.processControllers();
-LRPC.processClientControllers();
+const LRPC = new LRPCEngine(service, authorize, url, config.queueHost, config.redis, Container);
+LRPC.processControllers(controllers);
+// LRPC.processClientControllers();
 LRPC.processQueueRequest();
 
 app.use("/lrpc", LRPC.processRequest);
 
-createServiceClient(url);
-createFEClient(url);
+createServiceClient(url, LRPC);
+createFEClient(url, LRPC);
 
 app.listen(port, () => {
   console.log(`Server listening at http://localhost:${port}`);
@@ -362,5 +378,5 @@ LRPCFunction,
 LRPCPayload,
 LRPCAuth,
 LRPCEngine,
-initLRPC,
+initLRPC
 };

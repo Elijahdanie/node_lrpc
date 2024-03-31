@@ -64,7 +64,7 @@ declare function LRPCPayload (path: string, isResponse?: boolean): <T extends { 
     constructor: T
   ) => void;
 
-declare function InitLRPC (
+declare function initLRPC (
     config: {
       service: string;
       app: Express;
@@ -83,4 +83,4 @@ declare function LRPCFunction
     response: any
   ): (target: any, name: string, descriptor: PropertyDescriptor) => void;
 
-export {LRPCEngine, LRPCAuth, LRPCPayload, InitLRPC, LRPCFunction}
+export {LRPCEngine, LRPCAuth, LRPCPayload, initLRPC, LRPCFunction}
