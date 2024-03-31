@@ -1,10 +1,10 @@
-import amqp from 'amqplib/callback_api';
+const amqp = require('amqplib/callback_api');
 
 
 // docker RUN
 // docker run -d -hostname rmq --name rabbitserver -p8080:15672 -p5672:5672 rabbitmq:3.12-managaement
 
-export class RabbitMq {
+class RabbitMq {
 
     constructor(queue, queueOptions) {
         this.queue = queue;
@@ -74,3 +74,6 @@ export class RabbitMq {
     };
 }
 
+module.exports = {
+    RabbitMq
+};

@@ -6,10 +6,10 @@ const { Redis } = require("ioredis");
 
 require("reflect-metadata");
 
-typeLibrary,
-serviceHandlerPromises,
-createServiceClient,
-createFEClient,
+const {typeLibrary,
+  serviceHandlerPromises,
+  createServiceClient,
+  createFEClient } = require("./bin/clientGenerator");
 
 class LRPCEngine {
 service;
@@ -242,13 +242,13 @@ async registerCallback(methodKey, className) {
 }
 }
 
-export const LRPCAuth =
+const LRPCAuth =
 (roles) =>
 (target, name, descriptor) => {
   Reflect.defineMetadata("auth", roles ? roles : "regular", target, name);
 };
 
-export const LRPCPayload =
+const LRPCPayload =
 (path, isResponse = false) =>
 (constructor) => {
   // Create an instance of the class
@@ -294,7 +294,7 @@ export const LRPCPayload =
   // console.log(script, path);
 };
 
-export const initLRPC = (
+const initLRPC = (
 config,
 authorize
 ) => {
@@ -319,7 +319,7 @@ app.listen(port, () => {
 return LRPC;
 };
 
-export const LRPCFunction =
+const LRPCFunction =
 (controller, request, response) =>
 (target, name, descriptor) => {
   serviceHandlerPromises.push(async () => {
@@ -354,4 +354,13 @@ switch (name) {
   default:
     return "any";
 }
+};
+
+
+module.exports = {
+LRPCFunction,
+LRPCPayload,
+LRPCAuth,
+LRPCEngine,
+initLRPC,
 };

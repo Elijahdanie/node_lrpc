@@ -1,7 +1,7 @@
 const fs = require('fs');
 
 
-export const createController = (controller) => {
+const createController = (controller) => {
     const controllerFolder = `src/controllers`;
 
     if(!fs.existsSync('./src')){
@@ -138,7 +138,7 @@ export class ${endpoint} implements HandlerConfig<${requestClass}, ${responseCla
 `
 }
 
-export const createRepository = (controller, path, endpoints, imports) => {
+const createRepository = (controller, path, endpoints, imports) => {
     let payloads = imports.map(endpoint => {
         return `import { ${endpoint}Request, ${endpoint}Response } from './endpoints/${endpoint}';`
     });
@@ -186,4 +186,11 @@ if(controller && !endpoint){
         fs.writeFileSync(endpointPath, endpointContent);
         console.log('Endpoint created successfully');
     }
+}
+
+
+module.exports = {
+    createController,
+    createEndpoint,
+    createRepository
 }
