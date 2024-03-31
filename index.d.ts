@@ -3,22 +3,30 @@ import { RabbitMq } from "./rabbitmq";
 import { Redis } from "ioredis";
 
 export interface IEndpoint {
-  validator(data: any): Promise<{ message: string; status: string }>;
-  handler(context: {
-    request: Request;
-    response: Response;
-    payload: any;
-    context: { id: string; type: string } | null;
-  }): Promise<any>;
+    handler: (data: any)=>Promise<any>
+    validator: (input: any)=>Promise<{message: string, status: Status}>
 }
 
-export interface Status {
-  message: string;
-  status: string;
-  data?: any;
+export type Status = 'success' | 'error' | 'unauthorized' | 'notFound' | 'restricted';
+
+export interface HandlerConfig<T, U> {
+    validator: (input: T)=>Promise<{message: string, status: Status}>
+    handler: (data: LRPCRequest<T>)=>Promise<BaseResponse<U>>
 }
 
-export interface LRPCEngine {
+export interface LRPCRequest<T> {
+    request: Request
+    response: Response
+    payload: T
+}
+
+declare class BaseResponse<T> {
+    message: string
+    status: Status
+    data?: T
+}
+
+declare class LRPCEngine {
   service: string;
   url: string;
   handlers: {
@@ -44,7 +52,7 @@ export interface LRPCEngine {
   registerCallback: (methodKey: string, className: string) => Promise<void>;
 }
 
-export interface LRPCAuth {
+interface LRPCAuth {
   (roles?: string[]): (
     target: any,
     name: string,
@@ -52,14 +60,11 @@ export interface LRPCAuth {
   ) => void;
 }
 
-export interface LRPCPayload {
-  (path: string, isResponse: boolean): <T extends { new (...args: any[]): {} }>(
+declare function LRPCPayload (path: string, isResponse?: boolean): <T extends { new (...args: any[]): {} }>(
     constructor: T
   ) => void;
-}
 
-export interface InitLRPC {
-  (
+declare function InitLRPC (
     config: {
       service: string;
       app: Express;
@@ -70,12 +75,12 @@ export interface InitLRPC {
     },
     authorize: (token: string, role: string[]) => any
   ): LRPCEngine;
-}
 
-export interface LRPCFunction {
+declare function LRPCFunction 
   (
     controller: string,
     request: any,
     response: any
   ): (target: any, name: string, descriptor: PropertyDescriptor) => void;
-}
+
+export {LRPCEngine, LRPCAuth, LRPCPayload, InitLRPC, LRPCFunction}

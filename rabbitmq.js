@@ -5,9 +5,7 @@ import amqp from 'amqplib/callback_api';
 // docker run -d -hostname rmq --name rabbitserver -p8080:15672 -p5672:5672 rabbitmq:3.12-managaement
 
 export class RabbitMq {
-    options: any;
-    queue: any;
-    channel: amqp.Channel;
+
     constructor(queue, queueOptions) {
         this.queue = queue;
         this.options = queueOptions;
@@ -25,7 +23,7 @@ export class RabbitMq {
     consumeCallback;
 
     connect = () => {
-        return new Promise((resolve: (channel: amqp.Channel)=>void, reject) => {
+        return new Promise((resolve, reject) => {
             amqp.connect(`amqp://${this.options.server.host}:5672`, (error0, connection) => {
                 if (error0) {
                     return reject(error0);

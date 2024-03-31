@@ -1,6 +1,6 @@
-import { LRPCEngine } from "../lrpc";
-import fs from 'fs';
-import { Redis } from "ioredis";
+const { LRPCEngine } = require("..");
+const fs = require('fs');
+const { Redis } = require("ioredis");
 
 const config = {
     host: 'localhost',

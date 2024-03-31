@@ -1,7 +1,7 @@
-import fs from 'fs';
+const fs = require('fs');
 
 
-export const createController = (controller: string) => {
+export const createController = (controller) => {
     const controllerFolder = `src/controllers`;
 
     if(!fs.existsSync('./src')){
@@ -50,15 +50,15 @@ export const ${controller}Controller = [${endpoints.join(', ')}];
     createRepository(controller, repositoryPath, endpoints, endpoints);
 }
 
-export const createEndpoint = (controller: string, endpoint: string) => {
+export const createEndpoint = (controller, endpoint) => {
 
     const requestClass = `${endpoint}Request`;
     const responseClass = `${endpoint}Response`;
     const repository = `${controller}Repository`;
 
     return`
-import { LRPCFunction, LRPCPayload } from "../../../lrpc/engine";
-import { BaseResponse, HandlerConfig, LRPCRequest, Status, IEndpoint } from "../../../lrpc/types";
+import { LRPCFunction, LRPCPayload } from "@sm/lrpc";
+import { BaseResponse, HandlerConfig, LRPCRequest, Status, IEndpoint } from "@sm/lrpc/types";
 import ${repository} from "../${repository}";
 import Container, {Service} from "typedi";
 
@@ -138,7 +138,7 @@ export class ${endpoint} implements HandlerConfig<${requestClass}, ${responseCla
 `
 }
 
-export const createRepository = (controller: string, path: string, endpoints: string[], imports: string[]) => {
+export const createRepository = (controller, path, endpoints, imports) => {
     let payloads = imports.map(endpoint => {
         return `import { ${endpoint}Request, ${endpoint}Response } from './endpoints/${endpoint}';`
     });
