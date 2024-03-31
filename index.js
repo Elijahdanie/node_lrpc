@@ -58,7 +58,7 @@ processQueueRequest = async () => {
   this.Queue.process(async ({ payload }, done) => {
     const { path, data, srcPath, token } = payload;
     const endpoint = this.handlers[path];
-    const func = Container.get(endpoint);
+    const func = this.container.get(endpoint);
     if (func) {
       const response = await func(data, token);
       if (response) {
