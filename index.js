@@ -106,7 +106,7 @@ processRequest = async (req, res) => {
 
     let context = null;
 
-    const classInstance = Container.get(className);
+    const classInstance = this.container.get(className);
 
     const metadataValue = Reflect.getMetadata(
       "auth",
