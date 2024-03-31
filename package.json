@@ -1,0 +1,28 @@
+{
+  "name": "@sm/lrpc",
+  "version": "2.1.5",
+  "type": "commonjs",
+  "description": "This package helps services communicate with each other using redis",
+  "main": "index.js",
+  "scripts": {
+    "test": "node ./test/service.js"
+  },
+  "keywords": [],
+  "author": "Elijah Daniel",
+  "license": "ISC",
+  "dependencies": {
+    "amqplib": "^0.10.3",
+    "commander": "9.0.0",
+    "ioredis": "^5.3.2",
+    "reflect-metadata": "^0.2.2",
+    "typedi": "^0.10.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Elijahdanie/lrpc.git"
+  },
+  "homepage": "https://github.com/Elijahdanie/lrpc#readme",
+  "devDependencies": {
+    "@types/express": "^4.17.21"
+  }
+}
