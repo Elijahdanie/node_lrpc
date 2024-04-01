@@ -13,6 +13,11 @@ const fetchScript = async ()=>{
     await Promise.all(allServices.map(async service =>{
         const script = await redis.get(`${service}_sc`);
         const folder = `./src/lrpc/serviceClients`;
+
+        if(!fs.existsSync(`./src/lrpc`)){
+            fs.mkdirSync(`./src/lrpc`);
+        }
+
         if(!fs.existsSync(folder)){
             fs.mkdirSync(folder);
         }
