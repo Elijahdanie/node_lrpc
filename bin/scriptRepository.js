@@ -12,13 +12,13 @@ const fetchScript = async ()=>{
     const allServices = await redis.smembers('lrpc_services');
     await Promise.all(allServices.map(async service =>{
         const script = await redis.get(`${service}_sc`);
-        const folder = `./src/serviceClients`;
+        const folder = `./src/lrpc/serviceClients`;
         if(!fs.existsSync(folder)){
             fs.mkdirSync(folder);
         }
-        fs.writeFileSync(`./src/serviceClients/${service}.ts`, script);
+        fs.writeFileSync(`./src/lrpc/serviceClients/${service}.ts`, script);
     }));
-    const indexFile = './src/serviceClients/index.ts';
+    const indexFile = './src/lrpc/serviceClients/index.ts';
     const content = `
     ${allServices.map(service => `
 import ${service} from "./${service}";`).join('\n')}

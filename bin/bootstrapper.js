@@ -168,7 +168,7 @@ export default class ${controller}Repository {
 
 const generateRegistry = ()=>{
 const controllerPath = './src/controllers';
-const registeryPath = './src/utils/registery.ts';
+const registeryPath = './src/lrpc/registery.ts';
 const files = fs.readdirSync(controllerPath).filter(f=>f !== '.DS_Store');
 // console.log(files);
     const script = `
@@ -179,7 +179,7 @@ const files = fs.readdirSync(controllerPath).filter(f=>f !== '.DS_Store');
 
 import {${fileName}Controller} from '../controllers/${fileName}';`;
     }).join('')}
-import serviceClients from '../serviceClients';
+import serviceClients from './serviceClients';
     
     
     

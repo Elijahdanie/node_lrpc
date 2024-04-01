@@ -214,11 +214,11 @@ footer +=  `
 
 `
         clientScript = header + allScripts.join('\n\n') + footer;
-        // const folder = `./src/clientsFE`;
-        //     if(!fs.existsSync(folder)){
-        //         fs.mkdirSync(folder);
-        //     }
-        //     fs.writeFileSync(`./src/clientsFE/${LRPC.service}.ts`, clientScript);
+        const folder = `./src/lrpc/clientsFE`;
+            if(!fs.existsSync(folder)){
+                fs.mkdirSync(folder, { recursive: true });
+            }
+            fs.writeFileSync(`./src/lrpc/clientsFE/${LRPC.service}.ts`, clientScript);
             LRPC.redis.set(`${LRPC.service}`, serviceClient);
             LRPC.redis.sadd('lrpc_services', LRPC.service);
         resolve("done");
