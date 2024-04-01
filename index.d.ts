@@ -7,7 +7,7 @@ export interface IEndpoint {
     validator: (input: any)=>Promise<{message: string, status: Status}>
 }
 
-export type Status = 'success' | 'error' | 'unauthorized' | 'notFound' | 'restricted';
+export type Status = 'success' | 'error' | 'unauthorized' | 'notFound' | 'restricted' | 'validationError';
 
 export interface HandlerConfig<T, U> {
     validator: (input: T)=>Promise<{message: string, status: Status}>
@@ -17,7 +17,11 @@ export interface HandlerConfig<T, U> {
 export interface LRPCRequest<T> {
     request: Request
     response: Response
-    payload: T
+    payload: T,
+    context: {
+        id: string
+        type: string
+    }
 }
 
 declare class BaseResponse<T> {
@@ -52,13 +56,12 @@ declare class LRPCEngine {
   registerCallback: (methodKey: string, className: string) => Promise<void>;
 }
 
-interface LRPCAuth {
+declare function LRPCAuth 
   (roles?: string[]): (
     target: any,
     name: string,
     descriptor: PropertyDescriptor
   ) => void;
-}
 
 declare function LRPCPayload (path: string, isResponse?: boolean): <T extends { new (...args: any[]): {} }>(
     constructor: T
@@ -67,6 +70,7 @@ declare function LRPCPayload (path: string, isResponse?: boolean): <T extends { 
 declare function initLRPC (
     config: {
       service: string;
+      apiGateWay: string;
       app: Express;
       port: number;
       hostname?: string;
@@ -74,9 +78,9 @@ declare function initLRPC (
       redis: { host: string; port: number };
     },
     authorize: (token: string, role: string[]) => any,
-    controllers,
-    serviceClients,
-    Container
+    controllers?,
+    serviceClients?,
+    Container?
   ): LRPCEngine;
 
 declare function LRPCFunction 

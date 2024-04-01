@@ -14,6 +14,7 @@ class LRPCEngine {
 service;
 container;
 url;
+apiGateWay;
 handlers = {};
 clientHandlers = {};
 static instance;
@@ -28,13 +29,15 @@ constructor(
   url,
   queueHost,
   redis,
-  Container
+  Container,
+  apiGateWay
 ) {
   if (LRPCEngine.instance) {
     throw new Error("Cannot create multiple instances of LRPCEngine");
   }
   this.url = url;
   this.service = service;
+  this.apiGateWay = apiGateWay;
 
   try {
     this.Queue = new RabbitMq(service, { server: { host: queueHost } });
@@ -84,7 +87,7 @@ processRequest = async (req, res) => {
       const func = this.clientHandlers[path];
       // console.log(func, 'FUNCTION', this.clientHandlers);
       if (func) {
-        const response = await func(data, req.headers.authorization);
+        const response = await func.request(data, req.headers.authorization);
         res.status(200).json(response);
         console.log("called");
         return;
@@ -332,11 +335,11 @@ controllers,
 serviceClients,
 Container
 ) => {
-const { service, app, port, hostname } = config;
+const { service, app, port, hostname, apiGateWay } = config;
 const url = hostname
   ? `https://${hostname}/lrpc`
   : `http://localhost:${port}/lrpc`;
-const LRPC = new LRPCEngine(service, authorize, url, config.queueHost, config.redis, Container);
+const LRPC = new LRPCEngine(service, authorize, url, config.queueHost, config.redis, Container, apiGateWay);
 LRPC.processControllers(controllers);
 LRPC.processClientControllers(serviceClients);
 LRPC.processQueueRequest();
@@ -354,7 +357,7 @@ return LRPC;
 };
 
 const LRPCFunction =
-(controller, request, response) =>
+(controller, request, response, isAuth) =>
 (target, name, descriptor) => {
   serviceHandlerPromises.push(async () => {
     // const paramNames = LRPCEngine.getParameterNames(descriptor.value);
@@ -362,6 +365,11 @@ const LRPCFunction =
     let methodName = target.constructor.name;
     const methodKey = `${LRPCEngine.instance.service}.${controller}.${methodName}`;
     await LRPCEngine.instance.registerCallback(methodKey, methodName);
+    const metadataValue = Reflect.getMetadata(
+      "auth",
+      target,
+      "handler"
+    );
 
     return {
       methodName,
@@ -369,6 +377,7 @@ const LRPCFunction =
       request,
       response,
       controller,
+      isAuth: metadataValue
     };
   });
 

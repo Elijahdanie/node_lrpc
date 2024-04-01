@@ -28,10 +28,10 @@ const generateClientCode = (controllerName, className, methodName, request, resp
         }`
 }
 
-const generateServiceCode = (controllerName, className, methodName, request, response, LRPC) => {
-
+const generateServiceCode = (controllerName, className, methodName, request, response, LRPC, isAuth) => {
     return `
         ${className}: {
+            ${isAuth ? `auth: '${isAuth}',` : ''}
             request: async (data: ${request.name}, token?: string): Promise<${response.name}> => {
 
                 try {
@@ -79,8 +79,8 @@ const createServiceClient = (url, LRPC)=>{
         const controllers = [];
         await Promise.all(serviceHandlerPromises.map(async p => {
             const result = await p();
-            const {controller, methodName, name, request, response} = result;
-            const script = generateServiceCode(controller, methodName, name, request, response, LRPC);
+            const {controller, methodName, name, request, response, isAuth} = result;
+            const script = generateServiceCode(controller, methodName, name, request, response, LRPC, isAuth);
             result.script = script;
             // console.log(result.controller, 'done');
             if(!controllerMaps[result.controller]){
@@ -116,7 +116,7 @@ const createServiceClient = (url, LRPC)=>{
 
 footer +=  `
     export const request = async (procedure: string, data: any, token?: string) => {
-        const response = await axios.post('${url}', {
+        const response = await axios.post('${LRPC.apiGateWay}', {
                 path: procedure,
                 data
             },
@@ -198,7 +198,7 @@ const createFEClient = (url, LRPC)=>{
 
 footer +=  `
     export const request = async (procedure: string, data: any, token?: string) => {
-        const response = await axios.post('${url}', {
+        const response = await axios.post('${LRPC.apiGateWay}', {
                 path: procedure,
                 data
             },
