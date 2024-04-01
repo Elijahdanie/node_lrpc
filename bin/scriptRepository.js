@@ -8,18 +8,32 @@ const config = {
 
 const redis = new Redis(config);
 
-export const fetchScript = async ()=>{
+const fetchScript = async ()=>{
     const allServices = await redis.smembers('lrpc_services');
-    allServices.forEach(async service =>{
-        console.log(service);
+    await Promise.all(allServices.map(async service =>{
         const script = await redis.get(`${service}_sc`);
         const folder = `./src/serviceClients`;
         if(!fs.existsSync(folder)){
             fs.mkdirSync(folder);
         }
         fs.writeFileSync(`./src/serviceClients/${service}.ts`, script);
-});
+    }));
+    const indexFile = './src/serviceClients/index.ts';
+    const content = `
+    ${allServices.map(service => `
+import ${service} from "./${service}";`).join('\n')}
+
+const serviceClients = {
+    ${allServices.map(service => `...${service}`).join(',\n')}
+}
+    
+ export default serviceClients;
+`;
+
+fs.writeFileSync(indexFile, content);
+    redis.disconnect();
 }
 
-
-fetchScript();
+module.exports = {
+    fetchScript
+}
