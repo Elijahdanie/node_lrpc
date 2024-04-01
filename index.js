@@ -76,17 +76,41 @@ processQueueRequest = async () => {
   });
 };
 
+fetchPayload = (request) => {
+  switch (request.method) {
+    case 'GET':
+      return {
+        path: request.query.path,
+        data: request.query.data ? JSON.parse(request.query.data) : null
+      }
+    case 'POST':
+      // Handle POST request
+      return request.body;
+    case 'PUT':
+      // Handle PUT request
+      return request.body;
+    case 'DELETE':
+      return {
+        path: request.query.path,
+        data: request.query.data ? JSON.parse(request.query.data) : null
+      }
+    default:
+      // Handle other types of requests
+      return null;
+  }
+}
+
 processRequest = async (req, res) => {
   // console.log(this.handlers);
   // console.log('called Endpoint');
   try {
-    const { path, data } = req.body;
+    const { path, data } = this.fetchPayload(req);
 
     if (!this.isLocal(path)) {
       // console.log(path);
       const func = this.clientHandlers[path];
       // console.log(func, 'FUNCTION', this.clientHandlers);
-      if(func.auth){
+      if(func && func.auth){
         const authResponse = LRPCEngine.instance.authorize(
           req.headers.authorization,
           func.auth
