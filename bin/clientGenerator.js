@@ -137,7 +137,7 @@ footer +=  `
         return response;
     }
 
-    export default [${controllers.join(',')}]
+    export default {${controllers.join(',')}}
 
 `
     serviceClient = header + allScripts.join('\n\n') + footer;

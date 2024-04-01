@@ -75,6 +75,7 @@ declare function initLRPC (
     },
     authorize: (token: string, role: string[]) => any,
     controllers,
+    serviceClients,
     Container
   ): LRPCEngine;
 

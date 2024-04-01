@@ -24,7 +24,7 @@ const fetchScript = async ()=>{
 import ${service} from "./${service}";`).join('\n')}
 
 const serviceClients = {
-    ${allServices.map(service => `...${service}`).join(',\n')}
+    ${allServices.map(service => `${service}`).join(',\n')}
 }
     
  export default serviceClients;

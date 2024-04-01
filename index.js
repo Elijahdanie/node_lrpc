@@ -170,7 +170,24 @@ processRequest = async (req, res) => {
   }
 };
 
-// processClientControllers = async () => {
+processClientControllers = async (serviceClients) => {
+
+  await Promise.all(
+    Object.keys(serviceClients).map(async (data) => {
+      // console.log(data);
+      Object.keys(serviceClients[data]).map((endpointName) => {
+        Object.keys(serviceClients[data][endpointName]).map((key) => {
+          // console.log(key, endpoint[key]);
+          const methodKey = `${data}.${endpointName}.${key}`;
+          const endpoint = serviceClients[data][endpointName];
+          this.clientHandlers[methodKey] = endpoint[key];
+        });
+      });
+    }
+  ));
+};
+
+// processClientControllers = async (serviceClients) => {
 //   const controllerPath = `./src/serviceClients`;
 
 //   if(!fs.existsSync(controllerPath)){
@@ -312,6 +329,7 @@ const initLRPC = (
 config,
 authorize,
 controllers,
+serviceClients,
 Container
 ) => {
 const { service, app, port, hostname } = config;
@@ -320,7 +338,7 @@ const url = hostname
   : `http://localhost:${port}/lrpc`;
 const LRPC = new LRPCEngine(service, authorize, url, config.queueHost, config.redis, Container);
 LRPC.processControllers(controllers);
-// LRPC.processClientControllers();
+LRPC.processClientControllers(serviceClients);
 LRPC.processQueueRequest();
 
 app.use("/lrpc", LRPC.processRequest);
