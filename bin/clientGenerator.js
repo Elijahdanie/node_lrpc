@@ -116,7 +116,7 @@ const createServiceClient = (url, LRPC)=>{
 
 footer +=  `
     export const request = async (procedure: string, data: any, token?: string) => {
-        const response = await axios.post('${LRPC.apiGateWay}', {
+        const response = await axios.post('${url}', {
                 path: procedure,
                 data
             },

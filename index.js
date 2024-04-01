@@ -86,6 +86,19 @@ processRequest = async (req, res) => {
       // console.log(path);
       const func = this.clientHandlers[path];
       // console.log(func, 'FUNCTION', this.clientHandlers);
+      if(func.auth){
+        const authResponse = LRPCEngine.instance.authorize(
+          req.headers.authorization,
+          func.auth
+        );
+  
+        if (authResponse.status !== "success") {
+          res.status(200).json(authResponse);
+          return;
+        }
+  
+        context = authResponse.data;
+      }
       if (func) {
         const response = await func.request(data, req.headers.authorization);
         res.status(200).json(response);
