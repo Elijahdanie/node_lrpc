@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 const commander = require('commander');
-const {createController, createEndpoint, generateRegistry} = require('./bootstrapper');
+const {createController, createEndpoint, generateRegistry, createUnitTests} = require('./bootstrapper');
 const { fetchScript } = require('./scriptRepository');
 const { exit } = require('process');
 
@@ -19,6 +19,7 @@ program
         // console.log(process.argv[3])
         createController(process.argv[3]);
         console.log('Created Controller');
+        exit();
     });
 
 program
@@ -39,6 +40,7 @@ program
         const endpointContent = createEndpoint(controller, endpoint);
         fs.writeFileSync(endpointPath, endpointContent);
         console.log('created endpoint');
+        exit();
     }
     });
 
@@ -58,6 +60,15 @@ program
     .description('Refresh Registery')
     .action(() => {
         generateRegistry();
+        console.log('Refreshed registry');
+        exit();
+    });
+
+program
+    .command('unittest <controller>')
+    .description('Refresh Registery')
+    .action(() => {
+        createUnitTests(process.argv[3]);
         console.log('Refreshed registry');
         exit();
     });
