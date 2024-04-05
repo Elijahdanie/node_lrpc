@@ -49,6 +49,7 @@ export const ${controller}Controller = [${endpoints.join(', ')}];
     const repositoryPath = `${controllerPath}/${controller}Repository.ts`;
     createRepository(controller, repositoryPath, endpoints, endpoints);
     generateRegistry();
+    createUnitTests(controller);
 }
 
 const createEndpoint = (controller, endpoint) => {
@@ -200,6 +201,9 @@ const createUnitTests = (controller)=>{
     const endpointsPath = `./src/controllers/${controller}/endpoints`;
     const endpoints = fs.readdirSync(endpointsPath).filter(f=>f !== '.DS_Store').map(f=>f.split('.')[0]);
     const testPath = `./src/tests/${controller}.ts`;
+    if(!fs.existsSync('./src/tests')){
+        fs.mkdirSync('./src/tests');
+    }
     console.log(__dirname);
 const testContent = `
 // modify import to specify the service
