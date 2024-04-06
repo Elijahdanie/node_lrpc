@@ -21,6 +21,7 @@ export interface LRPCRequest<T> {
     context: {
         id: string
         type: string
+        permission: string
     }
 }
 
@@ -77,7 +78,7 @@ declare function initLRPC (
       queueHost: string;
       redis: { host: string; port: number };
     },
-    authorize: (token: string, role: string[]) => any,
+    authorize: (token: string, path: string, role: string[]) => any,
     controllers?,
     serviceClients?,
     Container?
