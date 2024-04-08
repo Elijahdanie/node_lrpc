@@ -59,7 +59,7 @@ const createEndpoint = (controller, endpoint) => {
     const repository = `${controller}Repository`;
 
     return`
-import { LRPCFunction, LRPCPayload } from "@sm/lrpc";
+import {LRPCAuth, LRPCFunction, LRPCPayload } from "@sm/lrpc";
 import { BaseResponse, HandlerConfig, LRPCRequest, Status, IEndpoint } from "@sm/lrpc";
 import ${repository} from "../${repository}";
 import Container, {Service} from "typedi";
@@ -115,6 +115,7 @@ export class ${endpoint} implements HandlerConfig<${requestClass}, ${responseCla
      * @param data
      * @returns BaseResponse<${responseClass}>
      */
+    @LRPCAuth()
     @LRPCFunction(controller, ${requestClass}, ${responseClass})
     async handler(data: LRPCRequest<${requestClass}>): Promise<BaseResponse<${responseClass}>> {
 
