@@ -4,6 +4,7 @@ const commander = require('commander');
 const {createController, createEndpoint, generateRegistry, createUnitTests} = require('./bootstrapper');
 const { fetchScript } = require('./scriptRepository');
 const { exit } = require('process');
+const fs = require('fs');
 
 const program = new commander.Command();
 
@@ -23,7 +24,7 @@ program
     });
 
 program
-    .command('create <controller> <endpoint>')
+    .command('endpoint <controller> <endpoint>')
     .description('Create an endpoint')
     .action(() => {
         // push the latest microservice configuration to the server
