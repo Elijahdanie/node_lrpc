@@ -1,5 +1,5 @@
 {
-  "name": "@sm/lrpc",
+  "name": "@smblk/lrpc",
   "version": "2.1.5",
   "type": "commonjs",
   "description": "This package helps services communicate with each other using redis",
