@@ -11,6 +11,13 @@ const program = new commander.Command();
 program.version('1.0.4');
 
 
+program.command('help')
+    .description('Show help')
+    .action(() => {
+        program.help();
+    });
+
+
 program
     .command('create <controller>')
     .description('Create a controller')

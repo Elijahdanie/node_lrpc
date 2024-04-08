@@ -4,12 +4,6 @@
   "type": "commonjs",
   "description": "This package helps services communicate with each other using redis",
   "main": "index.js",
-  "scripts": {
-    "test": "node ./test/service.js"
-  },
-  "publishConfig": {
-    "registry": "https://registry.npmjs.org/elijahdanie"
-  },
   "bin": {
     "lrpc": "./bin/cli.js"
   },
@@ -25,9 +19,9 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/Elijahdanie/lrpc.git"
+    "url": "https://github.com/Elijahdanie/mrn-lrpc.git"
   },
-  "homepage": "https://github.com/Elijahdanie/lrpc#readme",
+  "homepage": "https://github.com/Elijahdanie/mrn-lrpc#readme",
   "devDependencies": {
     "@types/express": "^4.17.21",
     "typescript": "^5.4.3"
