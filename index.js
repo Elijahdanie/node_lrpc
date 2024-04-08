@@ -156,13 +156,14 @@ processRequest = async (req, res) => {
     // console.log(metadataValue);
 
     if (metadataValue) {
-      const authResponse = LRPCEngine.instance.authorize(
+      const authResponse = await LRPCEngine.instance.authorize(
         req.headers.authorization,
         path,
         metadataValue
       );
 
       if (authResponse.status !== "success") {
+        console.log(authResponse);
         res.status(200).json(authResponse);
         return;
       }
