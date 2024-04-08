@@ -1,11 +1,14 @@
 {
-  "name": "@smblk/lrpc",
-  "version": "2.1.5",
+  "name": "mrn-lrpc",
+  "version": "0.0.1",
   "type": "commonjs",
   "description": "This package helps services communicate with each other using redis",
   "main": "index.js",
   "scripts": {
     "test": "node ./test/service.js"
+  },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/elijahdanie"
   },
   "bin": {
     "lrpc": "./bin/cli.js"
