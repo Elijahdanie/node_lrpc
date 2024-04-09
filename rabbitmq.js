@@ -24,7 +24,7 @@ class RabbitMq {
 
     connect = () => {
         return new Promise((resolve, reject) => {
-            amqp.connect(`amqp://${this.options.server}`, (error0, connection) => {
+            amqp.connect(`${this.options.server}`, (error0, connection) => {
                 if (error0) {
                     return reject(error0);
                 }

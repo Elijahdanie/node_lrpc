@@ -378,7 +378,7 @@ const { service, app, port, hostname, apiGateWay } = config;
 const url = hostname
   ? `https://${hostname}/lrpc`
   : `http://localhost:${port}/lrpc`;
-const LRPC = new LRPCEngine(service, authorize, url, config.queueHost, config.redis, Container, apiGateWay);
+const LRPC = new LRPCEngine(service, authorize, url, config.rabbitmqUrl, config.redis, Container, apiGateWay);
 LRPC.processControllers(controllers);
 LRPC.processClientControllers(serviceClients);
 LRPC.processQueueRequest();
