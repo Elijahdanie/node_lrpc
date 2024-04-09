@@ -27,7 +27,7 @@ constructor(
   service,
   authorize,
   url,
-  queueHost,
+  rabbitmqUrl,
   redis,
   Container,
   apiGateWay
@@ -40,7 +40,7 @@ constructor(
   this.apiGateWay = apiGateWay;
 
   try {
-    this.Queue = new RabbitMq(service, { server: { host: queueHost } });
+    this.Queue = new RabbitMq(service, { server: rabbitmqUrl });
   } catch (error) {
     console.log(error);
   }

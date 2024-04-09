@@ -75,7 +75,7 @@ declare function initLRPC (
       app: Express;
       port: number;
       hostname?: string;
-      queueHost: string;
+      rabbitmqUrl: string;
       redis: { host: string; port: number };
     },
     authorize: (token: string, path: string, role: string[]) => any,
