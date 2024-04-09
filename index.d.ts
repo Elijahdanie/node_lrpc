@@ -21,6 +21,7 @@ export interface LRPCRequest<T> {
     context: {
         id: string
         type: string
+        path: string
         permission: string
     }
 }

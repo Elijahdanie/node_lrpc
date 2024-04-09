@@ -169,6 +169,7 @@ processRequest = async (req, res) => {
       }
 
       context = authResponse.data;
+      context.path = path;
     }
 
     let isValid = { message: "", status: "" };
