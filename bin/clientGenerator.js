@@ -164,7 +164,7 @@ footer +=  `
         //     }
         //     fs.writeFileSync(`./src/serviceClients/${LRPC.service}.ts`, serviceClient);
     fs.writeFileSync(`./src/lrpc/serviceClients/${LRPC.service}.access.json`, JSON.stringify(permissions, null, 2));
-            LRPC.redis.set(`${LRPC.service}_sc`, serviceClient);
+            LRPC.redis.set(`${LRPC.environment}`, serviceClient);
             LRPC.redis.sadd('lrpc_services', LRPC.service);
     }, 1000);
 }

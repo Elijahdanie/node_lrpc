@@ -9,9 +9,11 @@ const {typeLibrary,
   serviceHandlerPromises,
   createServiceClient,
   createFEClient } = require("./bin/clientGenerator");
+const { fetchScript, fetchScriptRemote } = require("./bin/scriptRepository");
 
 class LRPCEngine {
 service;
+environment;
 container;
 url;
 apiGateWay;
@@ -50,6 +52,7 @@ constructor(
   LRPCEngine.instance = this;
   LRPCEngine.trackInstance++;
   this.container = Container;
+  this.environment = `${process.env.NODE_ENV}`;
   // console.log('CREATED INSTANCE');
 }
 
@@ -212,6 +215,10 @@ processRequest = async (req, res) => {
     });
   }
 };
+
+fetchScript = async () => {
+  return await fetchScriptRemote(this.environment);
+}
 
 processClientControllers = async (serviceClients) => {
 
