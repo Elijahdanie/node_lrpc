@@ -40,9 +40,10 @@ constructor(
   this.url = url;
   this.service = service;
   this.apiGateWay = apiGateWay;
+  this.environment = `${process.env.NODE_ENV}`;
 
   try {
-    this.Queue = new RabbitMq(service, { server: rabbitmqUrl });
+    this.Queue = new RabbitMq(this.environment, { server: rabbitmqUrl });
   } catch (error) {
     console.log(error);
   }
@@ -52,7 +53,6 @@ constructor(
   LRPCEngine.instance = this;
   LRPCEngine.trackInstance++;
   this.container = Container;
-  this.environment = `${process.env.NODE_ENV}`;
   // console.log('CREATED INSTANCE');
 }
 
