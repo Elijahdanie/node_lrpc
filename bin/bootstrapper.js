@@ -195,6 +195,7 @@ export {controllers, serviceClients};
     
 `
     fs.writeFileSync(registeryPath, script);
+    console.log(registeryPath);
 
 }
 

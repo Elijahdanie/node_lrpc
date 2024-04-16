@@ -180,8 +180,8 @@ footer +=  `
         //     }
         //     fs.writeFileSync(`./src/serviceClients/${LRPC.service}.ts`, serviceClient);
     fs.writeFileSync(`./src/lrpc/serviceClients/${LRPC.service}.access.json`, JSON.stringify(permissions, null, 2));
-            LRPC.redis.set(`${LRPC.environment}`, serviceClient);
-            LRPC.redis.sadd('lrpc_services', LRPC.service);
+            LRPC.redis.set(`${LRPC.service}-${LRPC.environment}-s`, serviceClient);
+            LRPC.redis.sadd(`server-${LRPC.environment}`, LRPC.service);
     }, 1000);
 }
 
@@ -256,8 +256,8 @@ footer +=  `
                 fs.mkdirSync(folder, { recursive: true });
             }
             fs.writeFileSync(`./src/lrpc/clientsFE/${LRPC.service}.ts`, clientScript);
-            LRPC.redis.set(`${LRPC.service}`, serviceClient);
-            LRPC.redis.sadd('lrpc_services', LRPC.service);
+            LRPC.redis.set(`${LRPC.service}-${LRPC.environment}-c`, serviceClient);
+            LRPC.redis.sadd(`client-${LRPC.environment}`, LRPC.service);
         resolve("done");
     }, 1000);
 });

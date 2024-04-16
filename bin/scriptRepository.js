@@ -9,9 +9,10 @@ const config = {
 const redis = new Redis(config);
 
 const fetchScript = async (environment)=>{
-    const allServices = await redis.smembers(environment);
+    const allServices = await redis.smembers(`server-${environment}`);
+    console.log(allServices, 'service')
     await Promise.all(allServices.map(async service =>{
-        const script = await redis.get(`${service}_sc`);
+        const script = await redis.get(`${service}-${environment}-s`);
         const folder = `./src/lrpc/serviceClients`;
 
         if(!fs.existsSync(`./src/lrpc`)){
@@ -41,9 +42,11 @@ fs.writeFileSync(indexFile, content);
 
 
 const fetchScriptRemote = async (environment)=>{
-    const allServices = await redis.smembers(environment);
+    console.log(environment)
+    const allServices = await redis.smembers(`client-${environment}`);
+    console.log(allServices, 'remote')
     await Promise.all(allServices.map(async service =>{
-        const script = await redis.get(`${service}_sc`);
+        const script = await redis.get(`${service}-${environment}-c`);
         const folder = `./src/lrpc/serviceClients`;
 
         if(!fs.existsSync(`./src/lrpc`)){
@@ -69,6 +72,8 @@ const serviceClients = {
 
 return content;
 }
+
+// fetchScriptRemote('dev');
 
 module.exports = {
     fetchScript,

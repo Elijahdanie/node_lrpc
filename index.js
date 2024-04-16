@@ -219,6 +219,7 @@ processRequest = async (req, res) => {
 };
 
 fetchScript = async (req, res) => {
+  console.log(req.headers, 'headers')
   const script = await fetchScriptRemote(this.environment);
   res.status(200).json(script);
 }

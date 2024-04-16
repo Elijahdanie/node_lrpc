@@ -57,8 +57,9 @@ program
     .description('Pull service clients')
     .action(async () => {
         // push the latest microservice configuration to the server
-
-        await fetchScript();
+        
+        await fetchScript('dev');
+        generateRegistry();
         console.log('Fetched Service Clients');
         exit();
     });
