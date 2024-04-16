@@ -235,16 +235,25 @@ footer +=  `
 
         const token = process.env.TOKEN;
         const url = process.env.GATEWAYURL;
-        const response = await axios.post(url, {
-                path: procedure,
-                data
-            },
-            {
-                headers: {
-                    Authorization: 'Bearer ' + token
+        if(url){
+            const response = await axios.post(url, {
+                    path: procedure,
+                    data
+                },
+                {
+                    headers: {
+                        Authorization: 'Bearer ' + token
+                    }
+                });
+            return response;
+        } else {
+            return {
+                data: {
+                    message: 'Gateway URL not set',
+                    status: 'error'
                 }
-            });
-        return response;
+            }
+        }
     }
 
     // export const controllers = [${controllers.join(',')}]
