@@ -42,9 +42,9 @@ fs.writeFileSync(indexFile, content);
 
 
 const fetchScriptRemote = async (environment)=>{
-    const allServices = await redis.smembers(`server-${environment}`);
+    const allServices = await redis.smembers(`client-${environment}`);
     const scripts = await Promise.all(allServices.map(async service =>{
-        const script = await redis.get(`${service}-${environment}-s`);
+        const script = await redis.get(`${service}-${environment}-c`);
         return script;
     }));
 
