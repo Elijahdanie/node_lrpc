@@ -256,7 +256,7 @@ footer +=  `
                 fs.mkdirSync(folder, { recursive: true });
             }
             fs.writeFileSync(`./src/lrpc/clientsFE/${LRPC.service}.ts`, clientScript);
-            LRPC.redis.set(`${LRPC.service}-${LRPC.environment}-c`, serviceClient);
+            LRPC.redis.set(`${LRPC.service}-${LRPC.environment}-c`, clientScript);
             LRPC.redis.sadd(`client-${LRPC.environment}`, LRPC.service);
         resolve("done");
     }, 1000);

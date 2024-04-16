@@ -42,35 +42,21 @@ fs.writeFileSync(indexFile, content);
 
 
 const fetchScriptRemote = async (environment)=>{
-    console.log(environment)
-    const allServices = await redis.smembers(`client-${environment}`);
-    console.log(allServices, 'remote')
-    await Promise.all(allServices.map(async service =>{
-        const script = await redis.get(`${service}-${environment}-c`);
-        const folder = `./src/lrpc/serviceClients`;
-
-        if(!fs.existsSync(`./src/lrpc`)){
-            fs.mkdirSync(`./src/lrpc`);
-        }
-
-        if(!fs.existsSync(folder)){
-            fs.mkdirSync(folder);
-        }
-        fs.writeFileSync(`./src/lrpc/serviceClients/${service}.ts`, script);
+    const allServices = await redis.smembers(`server-${environment}`);
+    const scripts = await Promise.all(allServices.map(async service =>{
+        const script = await redis.get(`${service}-${environment}-s`);
+        return script;
     }));
-    const indexFile = './src/lrpc/serviceClients/index.ts';
-    const content = `
-    ${allServices.map(service => `
-import ${service} from "./${service}";`).join('\n')}
 
-const serviceClients = {
-    ${allServices.map(service => `${service}`).join(',\n')}
-}
-    
- export default serviceClients;
-`;
+    const scriptDictionary = {};
 
-return content;
+    scripts.forEach((script, index)=>{
+        scriptDictionary[allServices[index]] = script;
+    });
+
+    // console.log(scriptDictionary, 'scripts');
+
+    return scriptDictionary;
 }
 
 // fetchScriptRemote('dev');
