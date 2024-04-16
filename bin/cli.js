@@ -52,6 +52,19 @@ program
     }
     });
 
+program.command('init')
+    .description('Show help')
+    .action(async () => {
+        const config = `
+module.exports = {
+    secret: 'mysecret'
+}
+`
+        fs.writeFileSync('./lrpc.config.js', config);
+        console.log('Created LRPC config file');
+        exit();
+    });
+
 program
     .command('pull')
     .description('Pull service clients')
