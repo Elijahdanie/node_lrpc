@@ -220,20 +220,23 @@ processRequest = async (req, res) => {
 };
 
 fetchScript = async (req, res) => {
-  console.log(req.headers, 'headers')
   
   const token = req.headers.authorization;
 
   if(!token || token !== secret){
     res.status(200).json({
-      message: 'Unauthorized',
+      message: 'Unauthorized Access',
       status: 'unauthorized'
     });
     return;
   }
 
   const script = await fetchScriptRemote(this.environment);
-  res.status(200).json(script);
+  res.status(200).json({
+    message: 'Fetched script',
+    status: 'success',
+    data: script
+  });
 }
 
 processClientControllers = async (serviceClients) => {
