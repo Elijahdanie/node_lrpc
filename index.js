@@ -11,6 +11,8 @@ const {typeLibrary,
   createFEClient } = require("./bin/clientGenerator");
 const { fetchScript, fetchScriptRemote } = require("./bin/scriptRepository");
 
+const propAccumulator = {};
+
 class LRPCEngine {
 service;
 environment;
@@ -332,48 +334,55 @@ const LRPCAuth =
 const LRPCPayload =
 (path, isResponse = false) =>
 (constructor) => {
-  // Create an instance of the class
-  const instance = new constructor();
+  // console.log(constructor.name);
+  let script = propAccumulator[constructor.name];
 
-  let script = `
-  class ${constructor.name} {\n`;
-  // Get the type of each property and log it
-  if (!isResponse) {
-    for (const key in instance) {
-      if (instance.hasOwnProperty(key)) {
-        const propertyType = typeof instance[key];
-        const property = `\t${key}?: ${propertyType}`;
-        // console.log(`Property '${key}' has type '${propertyType}'`);
-        script += `\t${property}\n`;
-      }
-    }
-  } else {
-    let data = `\t\tmessage: string\n\t\tstatus: Status\n\t\tdata?: {\n`;
-    for (const key in instance) {
-      if (instance.hasOwnProperty(key)) {
-        let propertyType = typeof instance[key];
-        let propertyName = `${propertyType}`;
-        if (propertyType === "object") {
-          propertyName = key;
-          console.log(instance[key].constructor.name);
-        }
-        const property = `\t${key}?: ${propertyType}`;
-        // console.log(`Property '${key}' has type '${propertyType}'`);
-        data += `\t\t${property}\n`;
-      }
-    }
-    data += `\t\t}`;
-    script += data;
+  if(!script){
+    script = {};
   }
 
-  script += `\n\t}`;
+  let finalScript = '';
+
+  // replicate the class
+   finalScript = `class ${constructor.name} {
+${Object.keys(script).map(key => `\t${key}: ${script[key]};`).join("\n")
+  }
+}`;
+
+  // console.log(finalScript);
+
+  if(isResponse){
+      finalScript = `class ${constructor.name}{\n\tmessage: string\n\tstatus: Status\n\tdata?: {\n`;
+      finalScript += `
+${Object.keys(script).map(key => `\t\t${key}: ${script[key]};`).join("\n")
+  }\n\t}\n}
+  `
+  }
 
   if (!typeLibrary[path]) {
     typeLibrary[path] = {};
   }
-  typeLibrary[path][constructor.name] = script;
-  // console.log(script, path);
+  typeLibrary[path][constructor.name] = finalScript;
 };
+
+const LRPCProp = (target, key) => {
+  const propertyType = Reflect.getMetadata("design:type", target, key);
+  const className = target.constructor.name;
+
+  propAccumulator[className] = {
+      ...propAccumulator[className],
+      [key]: propertyType.name
+  }
+}
+
+const LRPCPropArray = (type) => (target, key) => {
+  const className = target.constructor.name;
+
+  propAccumulator[className] = {
+      ...propAccumulator[className],
+      [key]: `${ type ? type.name : 'any'}[]`
+  }
+}
 
 const initLRPC = (
 config,
@@ -451,6 +460,8 @@ module.exports = {
 LRPCFunction,
 LRPCPayload,
 LRPCAuth,
+LRPCProp,
+LRPCPropArray,
 LRPCEngine,
 initLRPC
 };

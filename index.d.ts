@@ -85,6 +85,13 @@ declare function initLRPC (
     Container?
   ): LRPCEngine;
 
+declare function LRPCProp (target: any, key: string): void;
+
+declare function LRPCPropArray (type?: { new (): any }): (
+    target: any,
+    key: string
+  ) => void;
+
 declare function LRPCFunction 
   (
     controller: string,
@@ -92,4 +99,4 @@ declare function LRPCFunction
     response: any
   ): (target: any, name: string, descriptor: PropertyDescriptor) => void;
 
-export {LRPCEngine, LRPCAuth, BaseResponse, LRPCPayload, initLRPC, LRPCFunction}
+export {LRPCEngine, LRPCAuth, LRPCPropArray, LRPCProp, BaseResponse, LRPCPayload, initLRPC, LRPCFunction}
