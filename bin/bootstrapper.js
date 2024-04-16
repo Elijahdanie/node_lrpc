@@ -219,7 +219,7 @@ export const ${controller}Test = () => {
 
             const response = await ${controller}.${endpoint}({
                 // Add your test data here
-            });
+            } as any);
 
             expect(response.status).toBe('success');
         })

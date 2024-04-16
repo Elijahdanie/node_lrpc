@@ -6,12 +6,12 @@ const { Redis } = require("ioredis");
 require("reflect-metadata");
 
 const {typeLibrary,
+  propAccumulator,
   serviceHandlerPromises,
   createServiceClient,
   createFEClient } = require("./bin/clientGenerator");
 const { fetchScript, fetchScriptRemote } = require("./bin/scriptRepository");
 
-const propAccumulator = {};
 
 class LRPCEngine {
 service;
@@ -239,36 +239,6 @@ processClientControllers = async (serviceClients) => {
   ));
 };
 
-// processClientControllers = async (serviceClients) => {
-//   const controllerPath = `./src/serviceClients`;
-
-//   if(!fs.existsSync(controllerPath)){
-//       return;
-//   }
-//   const fileContents = fs.readdirSync(controllerPath);
-
-//   await Promise.all(
-//     fileContents.map(async (data) => {
-//       const targetPath = `${controllerPath}/${data}`;
-//       // console.log(targetPath);
-//       const fileName = data.split(".")[0];
-//       if (fileName !== this.service) {
-//         const dynamicImport = await import(path.resolve(targetPath));
-//         Object.keys(dynamicImport).forEach((key) => {
-//           // console.log(controller);
-//           if (!["request", "queue"].includes(key)) {
-//             Object.keys(dynamicImport[key]).map((endpoint) => {
-//               const methodKey = `${fileName}.${key}.${endpoint}`;
-//               // console.log(dynamicImport[key][endpoint]);
-//               this.clientHandlers[methodKey] =
-//                 dynamicImport[key][endpoint].request;
-//             });
-//           }
-//         });
-//       }
-//     })
-//   );
-// };
 
 processControllers = async (controllers) => {
   // console.log(controllers);
@@ -281,31 +251,6 @@ processControllers = async (controllers) => {
     });
   }));
 };
-
-// processControllers = async () => {
-//   const controllerPath = `./src/controllers`;
-//   const fileContents = fs.readdirSync(controllerPath);
-
-//   // make a dynamic import
-
-//   // console.log(fileContents);
-
-//   await Promise.all(
-//     fileContents.map(async (data) => {
-//       const targetPath = `${controllerPath}/${data}/index.ts`;
-//       const dynamicImport = await import(path.resolve(targetPath));
-//       // console.log(dynamicImport[`${data}Controller`]);
-//       const endpoints = dynamicImport[`${data}Controller`];
-//       endpoints.forEach((endpoint) => {
-//         Container.set(endpoint.name, new endpoint());
-//         // const check = Container.get(endpoint.name);
-//         // console.log(endpoint.name, check);
-//       });
-//     })
-//   );
-
-//   // console.log('instance', LRPCEngine.trackInstance);
-// };
 
 static getParameterNames(func) {
   const match = func.toString().match(/^async\s*\w+\s*\((.*?)\)/);
@@ -341,11 +286,22 @@ const LRPCPayload =
     script = {};
   }
 
+  const derivedClass = Object.getPrototypeOf(constructor);
+    
+  if(derivedClass.name){
+      script = {
+          ...script,
+          ...propAccumulator[derivedClass.name]
+      }
+
+      propAccumulator[constructor.name] = script;
+  }
+
   let finalScript = '';
 
   // replicate the class
    finalScript = `class ${constructor.name} {
-${Object.keys(script).map(key => `\t${key}: ${script[key]};`).join("\n")
+${Object.keys(script).map(key => `\t${key}?: ${script[key]};`).join("\n")
   }
 }`;
 
@@ -354,7 +310,7 @@ ${Object.keys(script).map(key => `\t${key}: ${script[key]};`).join("\n")
   if(isResponse){
       finalScript = `class ${constructor.name}{\n\tmessage: string\n\tstatus: Status\n\tdata?: {\n`;
       finalScript += `
-${Object.keys(script).map(key => `\t\t${key}: ${script[key]};`).join("\n")
+${Object.keys(script).map(key => `\t\t${key}?: ${script[key]};`).join("\n")
   }\n\t}\n}
   `
   }

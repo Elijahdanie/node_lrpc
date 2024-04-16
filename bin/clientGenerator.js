@@ -3,20 +3,36 @@ const fs = require('fs');
 
 const serviceHandlerPromises = [];
 const typeLibrary = {};
+const propAccumulator = {};
 var clientScript = ``;
 var serviceClient = ``;
 
 
+const getTypeDefinitions = (type) => {
+    const data = propAccumulator[type];
+
+    if(!data){
+        return 'any'
+    } else {
+        let typeDef = '{\n';
+        for(const key in data){
+            typeDef += `\t\t\t${key}: ${data[key]};\n`
+        }
+        typeDef += '\t\t}';
+        return typeDef;
+    }
+}
+
 const generateClientCode = (controllerName, className, methodName, request, response, LRPC) => {
 
     return`
-        static async ${className}(data: ${request.name}, token?: string): Promise<${response.name}> {
+        static async ${className}(data: ${getTypeDefinitions(request.name)} | ${request.name}):Promise<${response.name}> {
 
             try {
 
                 const dataKey = '${LRPC.service}.${controllerName}.${className}';
 
-                const response = await request(dataKey, data, token);
+                const response = await request(dataKey, data);
 
                 return response.data;
             } catch (error) {
@@ -215,7 +231,9 @@ const createFEClient = (url, LRPC)=>{
 `\n\ttype Status = 'success' | 'error' | 'unauthorized' | 'notFound' | 'restricted' | 'validationError';`
 
 footer +=  `
-    export const request = async (procedure: string, data: any, token?: string) => {
+    export const request = async (procedure: string, data: any) => {
+
+        const token = process.env.TOKEN;
         const response = await axios.post('${LRPC.apiGateWay}', {
                 path: procedure,
                 data
@@ -255,6 +273,7 @@ const fetchServiceClient = ()=>{
 module.exports = {
     serviceHandlerPromises,
     typeLibrary,
+    propAccumulator,
     generateClientCode,
     generateServiceCode,
     createServiceClient,
