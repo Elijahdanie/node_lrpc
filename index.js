@@ -11,6 +11,7 @@ const {typeLibrary,
   createServiceClient,
   createFEClient } = require("./bin/clientGenerator");
 const { fetchScript, fetchScriptRemote } = require("./bin/scriptRepository");
+const { secret } = require("../../lrpc.config");
 
 
 class LRPCEngine {
@@ -220,6 +221,17 @@ processRequest = async (req, res) => {
 
 fetchScript = async (req, res) => {
   console.log(req.headers, 'headers')
+  
+  const token = req.headers.authorization;
+
+  if(!token || token !== secret){
+    res.status(200).json({
+      message: 'Unauthorized',
+      status: 'unauthorized'
+    });
+    return;
+  }
+
   const script = await fetchScriptRemote(this.environment);
   res.status(200).json(script);
 }
