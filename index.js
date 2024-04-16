@@ -218,8 +218,9 @@ processRequest = async (req, res) => {
   }
 };
 
-fetchScript = async () => {
-  return await fetchScriptRemote(this.environment);
+fetchScript = async (req, res) => {
+  const script = await fetchScriptRemote(this.environment);
+  res.status(200).json(script);
 }
 
 processClientControllers = async (serviceClients) => {
@@ -357,6 +358,8 @@ LRPC.processClientControllers(serviceClients);
 LRPC.processQueueRequest();
 
 app.use("/lrpc", LRPC.processRequest);
+
+app.get("/client", LRPC.fetchScript);
 
 createServiceClient(url, LRPC);
 createFEClient(url, LRPC);
