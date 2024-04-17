@@ -232,7 +232,7 @@ fetchScript = async (req, res) => {
     return;
   }
 
-  const script = await fetchScriptRemote(this.environment);
+  const script = await fetchScriptRemote(this.environment, this);
   res.status(200).json({
     message: 'Fetched script',
     status: 'success',
