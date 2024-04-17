@@ -1,5 +1,5 @@
 {
-  "name": "mrn-lrpc-server",
+  "name": "@elijahdanie/mrn-lrpc-server",
   "version": "0.0.1",
   "type": "commonjs",
   "description": "This package helps services communicate with each other using redis",
@@ -8,7 +8,7 @@
     "lrpc": "./bin/cli.js"
   },
   "publishConfig": {
-    "registry": "https://npm.pkg.github.com/@elijahdanie"
+    "registry": "https://npm.pkg.github.com"
   },
   "keywords": [],
   "author": "Elijah Daniel",
