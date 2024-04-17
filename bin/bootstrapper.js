@@ -190,7 +190,7 @@ const controllers = {
     }).join(', ')}
 }
     
-    
+
 export {controllers, serviceClients};
     
 `

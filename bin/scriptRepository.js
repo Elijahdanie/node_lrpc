@@ -1,14 +1,14 @@
 const fs = require('fs');
 const { Redis } = require("ioredis");
 
-const config = {
-    host: 'localhost',
-    port: 6379
-}
-
-const redis = new Redis(config);
-
 const fetchScript = async (environment)=>{
+    const config = {
+        host: 'localhost',
+        port: 6379
+    }
+    
+    const redis = new Redis(config);
+    
     const allServices = await redis.smembers(`server-${environment}`);
     console.log(allServices, 'service')
     await Promise.all(allServices.map(async service =>{
@@ -41,10 +41,10 @@ fs.writeFileSync(indexFile, content);
 }
 
 
-const fetchScriptRemote = async (environment)=>{
-    const allServices = await redis.smembers(`client-${environment}`);
+const fetchScriptRemote = async (environment, LRPC)=>{
+    const allServices = await LRPC.redis.smembers(`client-${environment}`);
     const scripts = await Promise.all(allServices.map(async service =>{
-        const script = await redis.get(`${service}-${environment}-c`);
+        const script = await LRPC.redis.get(`${service}-${environment}-c`);
         return script;
     }));
 

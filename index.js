@@ -51,6 +51,7 @@ constructor(
     console.log(error);
   }
 
+  console.log(redis);
   this.redis = new Redis(redis);
   this.authorize = authorize;
   LRPCEngine.instance = this;
