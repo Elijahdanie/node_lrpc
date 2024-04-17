@@ -224,6 +224,7 @@ fetchScript = async (req, res) => {
   
   const token = req.headers.authorization;
 
+  console.log(token, secret, 'TOKEN');
   if(!token || token !== secret){
     res.status(200).json({
       message: 'Unauthorized Access',
