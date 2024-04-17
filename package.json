@@ -1,6 +1,6 @@
 {
   "name": "mrn-lrpc",
-  "version": "0.0.22",
+  "version": "0.0.23",
   "type": "commonjs",
   "description": "This package helps services communicate with each other using redis",
   "main": "index.js",

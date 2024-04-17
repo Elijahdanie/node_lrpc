@@ -342,18 +342,32 @@ const LRPCProp = (target, key) => {
   const propertyType = Reflect.getMetadata("design:type", target, key);
   const className = target.constructor.name;
 
+  // check if the proprty type is not a primitive type
+  const isPrimitive = ["String", "Number", "Boolean"].includes(propertyType.name);
+
   propAccumulator[className] = {
       ...propAccumulator[className],
-      [key]: propertyType.name
+      [key]: isPrimitive ? propertyType.name.toLowerCase() : propertyType.name
   }
 }
 
 const LRPCPropArray = (type) => (target, key) => {
   const className = target.constructor.name;
 
-  propAccumulator[className] = {
-      ...propAccumulator[className],
-      [key]: `${ type ? type.name : 'any'}[]`
+  if(type) {
+    const isPrimitive = ["String", "Number", "Boolean"].includes(type.name);
+
+    const finalType = isPrimitive ? type.name.toLowerCase() : type.name;
+
+    propAccumulator[className] = {
+        ...propAccumulator[className],
+        [key]: `${finalType}[]`
+    }
+  } else {
+    propAccumulator[className] = {
+        ...propAccumulator[className],
+        [key]: 'any[]'
+    }
   }
 }
 
