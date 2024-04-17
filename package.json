@@ -7,6 +7,9 @@
   "bin": {
     "lrpc": "./bin/cli.js"
   },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/@elijahdanie"
+  },
   "keywords": [],
   "author": "Elijah Daniel",
   "license": "ISC",
