@@ -32,8 +32,6 @@ constructor(
   service,
   authorize,
   url,
-  rabbitmqUrl,
-  redis,
   Container,
   apiGateWay
 ) {
@@ -46,13 +44,13 @@ constructor(
   this.environment = `${process.env.NODE_ENV}`;
 
   try {
-    this.Queue = new RabbitMq(this.environment, { server: rabbitmqUrl });
+    this.Queue = new RabbitMq(this.environment, { server: process.env.RABBITMQ_URL });
   } catch (error) {
     console.log(error);
   }
 
-  console.log(redis);
-  this.redis = new Redis(redis);
+  
+  this.redis = new Redis(process.env.REDIS_URL);
   this.authorize = authorize;
   LRPCEngine.instance = this;
   LRPCEngine.trackInstance++;
@@ -380,11 +378,17 @@ controllers,
 serviceClients,
 Container
 ) => {
-const { service, app, port, hostname, apiGateWay } = config;
-const url = hostname
-  ? `https://${hostname}/lrpc`
-  : `http://localhost:${port}/lrpc`;
-const LRPC = new LRPCEngine(service, authorize, url, config.rabbitmqUrl, config.redis, Container, apiGateWay);
+const { service, app } = config;
+
+if(!process.env.HOSTNAME){
+  console.warn('Please provide a HOSTNAME in your .env to ensure proper code generation');
+}
+
+if(!process.env.GATEWAYURL){
+  console.warn('Please provide a GATEWAYURL in your .env to ensure proper code generation');
+}
+
+const LRPC = new LRPCEngine(service, authorize, process.env.HOSTNAME, Container, process.env.GATEWAYURL);
 LRPC.processControllers(controllers);
 LRPC.processClientControllers(serviceClients);
 LRPC.processQueueRequest();
@@ -393,10 +397,10 @@ app.use("/lrpc", LRPC.processRequest);
 
 app.get("/client", LRPC.fetchScript);
 
-createServiceClient(url, LRPC);
-createFEClient(url, LRPC);
+createServiceClient(process.env.GATEWAYURL, LRPC);
+createFEClient(process.env.GATEWAYURL, LRPC);
 
-app.listen(port, () => {
+app.listen(process.env.PORT, () => {
   console.log(`Server listening at http://localhost:${port}`);
 });
 

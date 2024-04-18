@@ -72,12 +72,7 @@ declare function LRPCPayload (path: string, isResponse?: boolean): <T extends { 
 declare function initLRPC (
     config: {
       service: string;
-      apiGateWay: string;
       app: Express;
-      port: number;
-      hostname?: string;
-      rabbitmqUrl: string;
-      redis: { host: string; port: number };
     },
     authorize: (token: string, path: string, role: string[]) => any,
     controllers?,
