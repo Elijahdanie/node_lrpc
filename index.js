@@ -401,7 +401,7 @@ createServiceClient(process.env.GATEWAYURL, LRPC);
 createFEClient(process.env.GATEWAYURL, LRPC);
 
 app.listen(process.env.PORT, () => {
-  console.log(`Server listening at http://localhost:${port}`);
+  console.log(`Server listening at http://localhost:${process.env.PORT}`);
 });
 
 return LRPC;
