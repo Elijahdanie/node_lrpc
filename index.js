@@ -19,7 +19,6 @@ service;
 environment;
 container;
 url;
-apiGateWay;
 handlers = {};
 clientHandlers = {};
 static instance;
@@ -32,15 +31,13 @@ constructor(
   service,
   authorize,
   url,
-  Container,
-  apiGateWay
+  Container
 ) {
   if (LRPCEngine.instance) {
     throw new Error("Cannot create multiple instances of LRPCEngine");
   }
   this.url = url;
   this.service = service;
-  this.apiGateWay = apiGateWay;
   this.environment = `${process.env.NODE_ENV}`;
 
   try {
@@ -388,7 +385,7 @@ if(!process.env.GATEWAYURL){
   console.warn('Please provide a GATEWAYURL in your .env to ensure proper code generation');
 }
 
-const LRPC = new LRPCEngine(service, authorize, process.env.HOSTNAME, Container, process.env.GATEWAYURL);
+const LRPC = new LRPCEngine(service, authorize, process.env.HOSTNAME, Container);
 LRPC.processControllers(controllers);
 LRPC.processClientControllers(serviceClients);
 LRPC.processQueueRequest();
@@ -397,11 +394,11 @@ app.use("/lrpc", LRPC.processRequest);
 
 app.get("/client", LRPC.fetchScript);
 
-createServiceClient(process.env.GATEWAYURL, LRPC);
-createFEClient(process.env.GATEWAYURL, LRPC);
+createServiceClient(LRPC);
+createFEClient(LRPC);
 
 app.listen(process.env.PORT, () => {
-  console.log(`Server listening at http://localhost:${process.env.PORT}`);
+  console.log(`Server listening on port ${process.env.PORT}`);
 });
 
 return LRPC;
