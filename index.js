@@ -340,7 +340,7 @@ const LRPCProp = (target, key) => {
   const className = target.constructor.name;
 
   // check if the proprty type is not a primitive type
-  const isPrimitive = ["String", "Number", "Boolean"].includes(propertyType.name);
+  const isPrimitive = ["String", "Number", "Boolean", "Object"].includes(propertyType.name);
 
   propAccumulator[className] = {
       ...propAccumulator[className],
@@ -352,7 +352,7 @@ const LRPCPropArray = (type) => (target, key) => {
   const className = target.constructor.name;
 
   if(type) {
-    const isPrimitive = ["String", "Number", "Boolean"].includes(type.name);
+    const isPrimitive = ["String", "Number", "Boolean", "Object"].includes(type.name);
 
     const finalType = isPrimitive ? type.name.toLowerCase() : type.name;
 
