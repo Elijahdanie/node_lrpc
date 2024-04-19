@@ -101,7 +101,8 @@ const createServiceClient = (LRPC)=>{
             result.script = script;
 
 
-            const permissionKey =`${LRPC.service}.${controller}`;
+            // const permissionKey =`${LRPC.service}.${controller}`;
+            const permissionKey =`${controller}`;
             let permission = permissions[permissionKey];
 
             if(!permission){
@@ -179,7 +180,8 @@ footer +=  `
         //         fs.mkdirSync(folder);
         //     }
         //     fs.writeFileSync(`./src/serviceClients/${LRPC.service}.ts`, serviceClient);
-    fs.writeFileSync(`./src/lrpc/serviceClients/${LRPC.service}.access.json`, JSON.stringify(permissions, null, 2));
+    fs.writeFileSync(`./src/lrpc/serviceClients/${LRPC.service}.access.json`, JSON.stringify({[LRPC.service]:permissions}, null, 2));
+            // LRPC.redis.set(`${LRPC.service}-${LRPC.environment}-p`)
             LRPC.redis.set(`${LRPC.service}-${LRPC.environment}-s`, serviceClient);
             LRPC.redis.sadd(`server-${LRPC.environment}`, LRPC.service);
     }, 1000);
