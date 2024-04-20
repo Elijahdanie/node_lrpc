@@ -22,7 +22,7 @@ export interface LRPCRequest<T> {
         id: string
         type: string
         path: string
-        permission: string
+        permissions: any
     }
 }
 
