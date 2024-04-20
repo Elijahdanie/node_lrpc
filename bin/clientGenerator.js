@@ -38,7 +38,8 @@ const generateClientCode = (controllerName, className, methodName, request, resp
             } catch (error) {
                 return {
                     message: (error as any).message,
-                    status: 'error'
+                    status: 'error',
+                    data: {}
                 }
             }
         }`
@@ -60,7 +61,8 @@ const generateServiceCode = (controllerName, className, methodName, request, res
                 } catch (error) {
                     return {
                         message: (error as any).message,
-                        status: 'error'
+                        status: 'error',
+                        data: {}
                     }
                 }
             },
@@ -76,7 +78,8 @@ const generateServiceCode = (controllerName, className, methodName, request, res
                     } catch (error) {
                         reject({
                             message: (error as any).message,
-                            status: 'error'
+                            status: 'error',
+                            data: {}
                         });
                     }
                 });
