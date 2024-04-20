@@ -322,7 +322,7 @@ ${Object.keys(script).map(key => `\t${key}?: ${script[key]};`).join("\n")
   // console.log(finalScript);
 
   if(isResponse){
-      finalScript = `class ${constructor.name}{\n\tmessage: string\n\tstatus: Status\n\tdata?: {\n`;
+      finalScript = `class ${constructor.name}{\n\tmessage: string\n\tstatus: Status\n\tdata: {\n`;
       finalScript += `
 ${Object.keys(script).map(key => `\t\t${key}?: ${script[key]};`).join("\n")
   }\n\t}\n}
