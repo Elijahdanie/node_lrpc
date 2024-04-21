@@ -108,17 +108,20 @@ fetchPayload = (request) => {
 processRequest = async (req, res) => {
   // console.log(this.handlers);
   // console.log('called Endpoint');
+
+  let context = null;
+
   try {
     const { path, data } = this.fetchPayload(req);
 
     if (!this.isLocal(path)) {
-      // console.log(path);
       const func = this.clientHandlers[path];
       // console.log(func, 'FUNCTION', this.clientHandlers);
       if(func && func.auth){
-        const authResponse = LRPCEngine.instance.authorize(
+        const authResponse = await LRPCEngine.instance.authorize(
           req.headers.authorization,
-          func.auth
+          path,
+          func.auth,
         );
 
         if (authResponse.status !== "success") {
@@ -129,9 +132,9 @@ processRequest = async (req, res) => {
         context = authResponse.data;
       }
       if (func) {
-        const response = await func.request(data, `LRPC ${JSON.stringify(context)} ${req.headers.authorization}`);
+        const newToken = `LRPC ${JSON.stringify(context)} ${req.headers.authorization}`;
+        const response = await func.request(data, newToken);
         res.status(200).json(response);
-        console.log("called");
         return;
       }
     }
@@ -148,8 +151,6 @@ processRequest = async (req, res) => {
     }
 
     // console.log(typeof className, LRPCEngine.trackInstance);
-
-    let context = null;
 
     const classInstance = this.container.get(className);
 
