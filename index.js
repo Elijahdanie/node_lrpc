@@ -26,12 +26,14 @@ static trackInstance = 0;
 authorize;
 Queue;
 redis;
+isGateway;
 
 constructor(
   service,
   authorize,
   url,
-  Container
+  Container,
+  isGateway = false
 ) {
   if (LRPCEngine.instance) {
     throw new Error("Cannot create multiple instances of LRPCEngine");
@@ -39,6 +41,7 @@ constructor(
   this.url = url;
   this.service = service;
   this.environment = `${process.env.NODE_ENV}`;
+  this.isGateway = isGateway;
 
   try {
     this.Queue = new RabbitMq(this.environment, { server: process.env.RABBITMQ_URL });
@@ -117,7 +120,7 @@ processRequest = async (req, res) => {
           req.headers.authorization,
           func.auth
         );
-  
+
         if (authResponse.status !== "success") {
           res.status(200).json(authResponse);
           return;
@@ -126,7 +129,7 @@ processRequest = async (req, res) => {
         context = authResponse.data;
       }
       if (func) {
-        const response = await func.request(data, req.headers.authorization);
+        const response = await func.request(data, `LRPC ${JSON.stringify(context)} ${req.headers.authorization}`);
         res.status(200).json(response);
         console.log("called");
         return;
@@ -375,7 +378,7 @@ controllers,
 serviceClients,
 Container
 ) => {
-const { service, app } = config;
+const { service, app, isGateway } = config;
 
 if(!process.env.HOSTNAME){
   console.warn('Please provide a HOSTNAME in your .env to ensure proper code generation');
@@ -385,7 +388,7 @@ if(!process.env.GATEWAYURL){
   console.warn('Please provide a GATEWAYURL in your .env to ensure proper code generation');
 }
 
-const LRPC = new LRPCEngine(service, authorize, process.env.HOSTNAME, Container);
+const LRPC = new LRPCEngine(service, authorize, process.env.HOSTNAME, Container, isGateway);
 LRPC.processControllers(controllers);
 LRPC.processClientControllers(serviceClients);
 LRPC.processQueueRequest();

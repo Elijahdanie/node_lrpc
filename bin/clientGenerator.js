@@ -153,7 +153,7 @@ const createServiceClient = (LRPC)=>{
 
 footer +=  `
     export const request = async (procedure: string, data: any, token?: string) => {
-        const response = await axios.post(process.env.HOSTNAME, {
+        const response = await axios.post('${process.env.HOSTNAME}', {
                 path: procedure,
                 data
             },
@@ -178,11 +178,11 @@ footer +=  `
 
 `
     serviceClient = header + allScripts.join('\n\n') + footer;
-        // const folder = `./src/serviceClients`;
-        //     if(!fs.existsSync(folder)){
-        //         fs.mkdirSync(folder);
-        //     }
-        //     fs.writeFileSync(`./src/serviceClients/${LRPC.service}.ts`, serviceClient);
+        const folder = `./src/lrpc/serviceClients`;
+            if(!fs.existsSync(folder)){
+                fs.mkdirSync(folder);
+            }
+            fs.writeFileSync(`./src/lrpc/serviceClients/${LRPC.service}.ts`, serviceClient);
     fs.writeFileSync(`./src/lrpc/serviceClients/${LRPC.service}.access.json`, JSON.stringify({[LRPC.service]:permissions}, null, 2));
             // LRPC.redis.set(`${LRPC.service}-${LRPC.environment}-p`)
             LRPC.redis.set(`${LRPC.service}-${LRPC.environment}-s`, serviceClient);

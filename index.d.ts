@@ -73,6 +73,7 @@ declare function initLRPC (
     config: {
       service: string;
       app: Express;
+      isGateway?: boolean;
     },
     authorize: (token: string, path: string, role: string[]) => any,
     controllers?,

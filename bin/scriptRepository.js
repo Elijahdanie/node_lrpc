@@ -1,13 +1,10 @@
 const fs = require('fs');
 const { Redis } = require("ioredis");
+const { redisUrl } = require('../../../../lrpc.config');
 
 const fetchScript = async (environment)=>{
-    const config = {
-        host: 'localhost',
-        port: 6379
-    }
     
-    const redis = new Redis(config);
+    const redis = new Redis(redisUrl);
     
     const allServices = await redis.smembers(`server-${environment}`);
     console.log(allServices, 'service')

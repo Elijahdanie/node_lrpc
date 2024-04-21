@@ -57,7 +57,9 @@ program.command('init')
     .action(async () => {
         const config = `
 module.exports = {
-    secret: 'mysecret'
+    service: 'my-service',
+    secret: 'mysecret',
+    redisUrl: 'redis://localhost:6379',
 }
 `
         fs.writeFileSync('./lrpc.config.js', config);
