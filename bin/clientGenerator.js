@@ -247,7 +247,7 @@ footer +=  `
                 },
                 {
                     headers: {
-                        Authorization: 'Bearer ' + token
+                        Authorization: token
                     }
                 });
             return response;
