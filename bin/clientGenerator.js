@@ -178,11 +178,11 @@ footer +=  `
 
 `
     serviceClient = header + allScripts.join('\n\n') + footer;
-        const folder = `./src/lrpc/serviceClients`;
-            if(!fs.existsSync(folder)){
-                fs.mkdirSync(folder);
-            }
-            fs.writeFileSync(`./src/lrpc/serviceClients/${LRPC.service}.ts`, serviceClient);
+        // const folder = `./src/lrpc/serviceClients`;
+        //     if(!fs.existsSync(folder)){
+        //         fs.mkdirSync(folder);
+        //     }
+        //     fs.writeFileSync(`./src/lrpc/serviceClients/${LRPC.service}.ts`, serviceClient);
     fs.writeFileSync(`./src/lrpc/serviceClients/${LRPC.service}.access.json`, JSON.stringify({[LRPC.service]:permissions}, null, 2));
             // LRPC.redis.set(`${LRPC.service}-${LRPC.environment}-p`)
             LRPC.redis.set(`${LRPC.service}-${LRPC.environment}-s`, serviceClient);
