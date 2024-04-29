@@ -3,33 +3,39 @@ import { RabbitMq } from "./rabbitmq";
 import { Redis } from "ioredis";
 
 export interface IEndpoint {
-    handler: (data: any)=>Promise<any>
-    validator: (input: any)=>Promise<{message: string, status: Status}>
+  handler: (data: any) => Promise<any>;
+  validator: (input: any) => Promise<{ message: string; status: Status }>;
 }
 
-export type Status = 'success' | 'error' | 'unauthorized' | 'notFound' | 'restricted' | 'validationError';
+export type Status =
+  | "success"
+  | "error"
+  | "unauthorized"
+  | "notFound"
+  | "restricted"
+  | "validationError";
 
 export interface HandlerConfig<T, U> {
-    validator: (input: T)=>Promise<{message: string, status: Status}>
-    handler: (data: LRPCRequest<T>)=>Promise<BaseResponse<U>>
+  validator: (input: T) => Promise<{ message: string; status: Status }>;
+  handler: (data: LRPCRequest<T>) => Promise<BaseResponse<U>>;
 }
 
 export interface LRPCRequest<T> {
-    request: Request
-    response: Response
-    payload: T,
-    context: {
-        id: string
-        type: string
-        path: string
-        permissions: any
-    }
+  request: Request;
+  response: Response;
+  payload: T;
+  context: {
+    id: string;
+    type: string;
+    path: string;
+    permissions: any;
+  };
 }
 
 declare class BaseResponse<T> {
-    message: string
-    status: Status
-    data?: T
+  message: string;
+  status: Status;
+  data?: T;
 }
 
 declare class LRPCEngine {
@@ -58,41 +64,63 @@ declare class LRPCEngine {
   registerCallback: (methodKey: string, className: string) => Promise<void>;
 }
 
-declare function LRPCAuth 
-  (roles?: string[]): (
-    target: any,
-    name: string,
-    descriptor: PropertyDescriptor
-  ) => void;
+declare function LRPCAuth(
+  roles?: string[]
+): (target: any, name: string, descriptor: PropertyDescriptor) => void;
 
-declare function LRPCPayload (path: string, isResponse?: boolean): <T extends { new (...args: any[]): {} }>(
-    constructor: T
-  ) => void;
+declare function LRPCPayload(
+  path: string,
+  isResponse?: boolean
+): <T extends { new (...args: any[]): {} }>(constructor: T) => void;
 
-declare function initLRPC (
-    config: {
-      service: string;
-      app: Express;
-      isGateway?: boolean;
-    },
-    authorize: (token: string, path: string, role: string[]) => any,
-    controllers?,
-    serviceClients?,
-    Container?
-  ): LRPCEngine;
+declare function initLRPC(
+  config: {
+    service: string;
+    app: Express;
+    isGateway?: boolean;
+  },
+  authorize: (token: string, path: string, role: string[]) => any,
+  controllers?,
+  serviceClients?,
+  Container?
+): LRPCEngine;
 
-declare function LRPCProp (target: any, key: string): void;
+declare function LRPCProp(target: any, key: string): void;
 
-declare function LRPCPropArray (type?: { new (): any }): (
-    target: any,
-    key: string
-  ) => void;
+declare function LRPCLimit(
+  model: any,
+  query?: string[]
+): (target: any, propertyKey: string, descriptor: PropertyDescriptor) => void;
 
-declare function LRPCFunction 
-  (
-    controller: string,
-    request: any,
-    response: any
-  ): (target: any, name: string, descriptor: PropertyDescriptor) => void;
+declare function LRPCResource (payloadKey?: string) : (target: any, propertyKey: string, descriptor: PropertyDescriptor) => void
 
-export {LRPCEngine, LRPCAuth, LRPCPropArray, LRPCProp, BaseResponse, LRPCPayload, initLRPC, LRPCFunction}
+declare function genericListFetch (model: any, data: any, keyQuery: {[key: string]: any}, permissions, misc: {include?:any, attributes?:any} = {}): Promise<{
+  data: any;
+  total: any;
+  page: any;
+  totalPages: number;
+}>
+
+declare function LRPCPropArray(type?: {
+  new (): any;
+}): (target: any, key: string) => void;
+
+declare function LRPCFunction(
+  controller: string,
+  request: any,
+  response: any
+): (target: any, name: string, descriptor: PropertyDescriptor) => void;
+
+export {
+  LRPCEngine,
+  LRPCAuth,
+  LRPCPropArray,
+  LRPCProp,
+  BaseResponse,
+  LRPCPayload,
+  initLRPC,
+  LRPCFunction,
+  LRPCLimit,
+  LRPCResource,
+  genericListFetch
+};
