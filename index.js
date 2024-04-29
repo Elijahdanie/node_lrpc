@@ -2,6 +2,7 @@ const path = require("path");
 const fs = require("fs");
 const { RabbitMq } = require("./rabbitmq");
 const { Redis } = require("ioredis");
+const  { genericListFetch, LRPCLimit, LRPCResource } = require('./decorators/auth.js')
 
 require("reflect-metadata");
 
@@ -459,5 +460,8 @@ LRPCAuth,
 LRPCProp,
 LRPCPropArray,
 LRPCEngine,
-initLRPC
+initLRPC,
+genericListFetch,
+LRPCLimit,
+LRPCResource
 };
