@@ -222,6 +222,7 @@ processRequest = async (req, res) => {
 
 fetchScript = async (req, res) => {
   
+  try {
   const token = req.headers.authorization;
 
   console.log(token, secret, 'TOKEN');
@@ -239,6 +240,13 @@ fetchScript = async (req, res) => {
     status: 'success',
     data: script
   });
+
+      
+} catch (error) {
+  res.status(500).json({
+    message: 'internal server error'
+  })
+}
 }
 
 processClientControllers = async (serviceClients) => {

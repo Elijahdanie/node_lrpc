@@ -105,8 +105,6 @@ const fetchScriptRemote = async (environment, LRPC)=>{
                 }
             }
         }
-    
-        // export const controllers = [${controllers.join(',')}]
 ` 
         scriptDictionary['index'] = footer;
 
