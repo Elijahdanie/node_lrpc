@@ -90,6 +90,7 @@ const LRPCResource = (payloadKey) => (target, propertyKey, descriptor) => {
         const id = data.payload[payloadKey];
 
         if(!data.context){
+            console.warn(`No context for endpoint ${data.request.body.path} Add @LRPCAuth to the endpoint`);
             return {
                 message: 'You are not authorized to access this resource',
                 status: 'unauthorized'

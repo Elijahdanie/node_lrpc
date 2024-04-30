@@ -11,7 +11,7 @@ const {typeLibrary,
   serviceHandlerPromises,
   createServiceClient,
   createFEClient } = require("./bin/clientGenerator");
-const { fetchScript, fetchScriptRemote } = require("./bin/scriptRepository");
+const { fetchScriptRemote } = require("./bin/scriptRepository");
 const { secret } = require("../../../lrpc.config.js");
 
 
