@@ -22,17 +22,22 @@ const fetchScript = async (environment)=>{
         fs.writeFileSync(`./src/lrpc/serviceClients/${service}.ts`, script);
     }));
     const indexFile = './src/lrpc/serviceClients/index.ts';
+    const utilsFile = './src/lrpc/serviceClients/utils.ts'
     const content = `
     ${allServices.map(service => `
 import ${service} from "./${service}";`).join('\n')}
+const serviceClients = {
+    ${allServices.map(service => `${service}`).join(',\n')}
+}
+
+ export default serviceClients;
+`;
+
+const utils = `
 import axios from 'axios';
 import { LRPCEngine } from '@elijahdanie/lrpc';
 
 export type Status = 'success' | 'error' | 'unauthorized' | 'notFound' | 'restricted' | 'validationError';
-
-const serviceClients = {
-    ${allServices.map(service => `${service}`).join(',\n')}
-}
 
 export const request = async (procedure: string, data: any, token?: string) => {
     const response = await axios.post('${process.env.HOSTNAME}', {
@@ -55,11 +60,10 @@ export const queue = async (procedure: string, data: any, token?: string): Promi
     });
     return response;
 }
-
- export default serviceClients;
-`;
+`
 
 fs.writeFileSync(indexFile, content);
+fs.writeFileSync(utilsFile, utils);
 redis.disconnect();
 }
 
