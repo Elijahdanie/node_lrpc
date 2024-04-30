@@ -4,6 +4,7 @@ const { RabbitMq } = require("./rabbitmq");
 const { Redis } = require("ioredis");
 const  { genericListFetch, LRPCLimit, LRPCResource } = require('./decorators/auth.js')
 const { LRPCMedia} = require('./decorators/media.js')
+const { LRPCRedirect, LRPCCallback } = require('./decorators/url.js')
 const multer = require('multer');
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
@@ -110,6 +111,42 @@ fetchPayload = (request) => {
   }
 }
 
+fetchDataFromCallback = (request) => {
+  // construct path from request
+  const path = request.originalUrl.split('?');
+  // remove the query part of the url
+  const splitPath = path[0].split("/");
+  const formatedPath = `${this.service}.${splitPath[2]}.${splitPath[3]}`;
+
+  switch (request.method) {
+    case 'GET':
+      return {
+        path: formatedPath,
+        data: request.query
+      }
+    case 'POST':
+      // Handle POST request
+      return {
+        path: formatedPath,
+        data: request.body
+      }
+    case 'PUT':
+      // Handle PUT request
+      return {
+        path: formatedPath,
+        data: request.body
+      }
+    case 'DELETE':
+      return {
+        path: formatedPath,
+        data: request.query
+      }
+    default:
+      // Handle other types of requests
+      return null;
+  }
+}
+
 processRequest = async (req, res) => {
   // console.log(this.handlers);
   // console.log('called Endpoint');
@@ -118,6 +155,14 @@ processRequest = async (req, res) => {
 
   try {
     const { path, data } = this.fetchPayload(req);
+
+    if(!path){
+      res.status(200).json({
+        message: 'Path not specified in payload',
+        status: 'error'
+      });
+      return;
+    }
 
     if (!this.isLocal(path)) {
       const func = this.clientHandlers[path];
@@ -270,14 +315,47 @@ processClientControllers = async (serviceClients) => {
   ));
 };
 
+processCallbacks = async (req, res) => {
+  const {path, data} = this.fetchDataFromCallback(req);
 
-processControllers = async (controllers) => {
+  const className = await this.handlers[path];
+
+  if (!className) {
+    res.status(404).json({
+      message: "Resource not found",
+      status: "notFound",
+      // data: null
+    });
+    return;
+  }
+
+  const classInstance = this.container.get(className);
+
+  const response = await classInstance.handler({
+    request: req,
+    response: res,
+    payload: data
+  });
+
+  if (response) res.status(200).json(response);
+
+
+}
+
+
+processControllers = async (controllers, app) => {
   // console.log(controllers);
   await Promise.all(Object.keys(controllers).map(async (controller) => {
     
     controllers[controller].forEach(async (endpoint) => {
       // const methodKey = `${this.service}.${controller}.${endpoint.name}`;
       // console.log(endpoint.name);
+      const fetchMetaKeyforCallback = Reflect.getMetadata("callback", endpoint.prototype, "handler");
+      // console.log(fetchMetaKeyforCallback, 'META');
+      if(fetchMetaKeyforCallback){
+        const path = `/callbacks/${controller.replace('Controller', '')}/${endpoint.name}`;
+        app.use(path, this.processCallbacks);
+      }
       LRPCEngine.instance.container.set(endpoint.name, new endpoint());
     });
   }));
@@ -403,7 +481,7 @@ if(!process.env.GATEWAYURL){
 }
 
 const LRPC = new LRPCEngine(service, authorize, process.env.HOSTNAME, Container, isGateway);
-LRPC.processControllers(controllers);
+LRPC.processControllers(controllers, app);
 LRPC.processClientControllers(serviceClients);
 LRPC.processQueueRequest();
 
@@ -442,7 +520,8 @@ const LRPCFunction =
       request,
       response,
       controller,
-      isAuth: metadataValue
+      isAuth: metadataValue,
+      isMedia: Reflect.getMetadata("media", target, name),
     };
   });
 
@@ -451,18 +530,6 @@ const LRPCFunction =
   return descriptor;
 };
 
-const getType = (name) => {
-switch (name) {
-  case "string":
-    return "string";
-  case "number":
-    return "number";
-  case "boolean":
-    return "boolean";
-  default:
-    return "any";
-}
-};
 
 
 module.exports = {
@@ -476,5 +543,7 @@ initLRPC,
 genericListFetch,
 LRPCLimit,
 LRPCResource,
-LRPCMedia
+LRPCMedia,
+LRPCCallback,
+LRPCRedirect
 };

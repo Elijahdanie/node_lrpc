@@ -124,6 +124,10 @@ declare function LRPCFunction(
 
 declare function LRPCMedia ( fieldName: string ): (target: any, propertyKey: string, descriptor: PropertyDescriptor) => void
 
+declare function LRPCRedirect (url: string): (target: any, propertyKey: string, descriptor: PropertyDescriptor) => void
+
+declare function LRPCCallback (target: any, propertyKey: string, descriptor: PropertyDescriptor): void
+
 export {
   LRPCEngine,
   LRPCAuth,
@@ -136,5 +140,7 @@ export {
   LRPCLimit,
   LRPCResource,
   genericListFetch,
-  LRPCMedia
+  LRPCMedia,
+  LRPCRedirect,
+  LRPCCallback
 };

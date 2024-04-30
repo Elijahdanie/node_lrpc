@@ -1,9 +1,9 @@
-
-
-
+require("reflect-metadata");
 
 const LRPCMedia = ( fieldName ) => (target, propertyKey, descriptor) => {
     const originalMethod = descriptor.value;
+
+    Reflect.defineMetadata("media", true, target, propertyKey);
     descriptor.value = function (...args) {
 
         try {
@@ -16,7 +16,7 @@ const LRPCMedia = ( fieldName ) => (target, propertyKey, descriptor) => {
             if (!files) {
                 return {
                     status: 'validationError',
-                    message: 'No files uploaded'
+                    message: 'No files uploaded, make sure the field name specified in decorator matches the files field names in the request.'
                 }
             }
             data.files = files;
