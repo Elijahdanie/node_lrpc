@@ -20,10 +20,21 @@ export interface HandlerConfig<T, U> {
   handler: (data: LRPCRequest<T>) => Promise<BaseResponse<U>>;
 }
 
+export interface File {
+  fieldname: string;
+  originalname: string;
+  encoding: string;
+  mimetype: string;
+  buffer: Buffer;
+  size: number;
+}
+
+
 export interface LRPCRequest<T> {
   request: Request;
   response: Response;
   payload: T;
+  files: File[];
   context: {
     id: string;
     type: string;
@@ -111,6 +122,8 @@ declare function LRPCFunction(
   response: any
 ): (target: any, name: string, descriptor: PropertyDescriptor) => void;
 
+declare function LRPCMedia ( fieldName: string ): (target: any, propertyKey: string, descriptor: PropertyDescriptor) => void
+
 export {
   LRPCEngine,
   LRPCAuth,
@@ -122,5 +135,6 @@ export {
   LRPCFunction,
   LRPCLimit,
   LRPCResource,
-  genericListFetch
+  genericListFetch,
+  LRPCMedia
 };

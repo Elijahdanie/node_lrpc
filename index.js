@@ -3,6 +3,10 @@ const fs = require("fs");
 const { RabbitMq } = require("./rabbitmq");
 const { Redis } = require("ioredis");
 const  { genericListFetch, LRPCLimit, LRPCResource } = require('./decorators/auth.js')
+const { LRPCMedia} = require('./decorators/media.js')
+const multer = require('multer');
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
 
 require("reflect-metadata");
 
@@ -403,7 +407,7 @@ LRPC.processControllers(controllers);
 LRPC.processClientControllers(serviceClients);
 LRPC.processQueueRequest();
 
-app.use("/lrpc", LRPC.processRequest);
+app.use("/lrpc", upload.array('file'), LRPC.processRequest);
 
 app.get("/client", LRPC.fetchScript);
 
@@ -471,5 +475,6 @@ LRPCEngine,
 initLRPC,
 genericListFetch,
 LRPCLimit,
-LRPCResource
+LRPCResource,
+LRPCMedia
 };
