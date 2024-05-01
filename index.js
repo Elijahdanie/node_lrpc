@@ -116,7 +116,7 @@ fetchDataFromCallback = (request) => {
   const path = request.originalUrl.split('?');
   // remove the query part of the url
   const splitPath = path[0].split("/");
-  const formatedPath = `${this.service}.${splitPath[2]}.${splitPath[3]}`;
+  const formatedPath = `${this.service}.${splitPath[1]}.${splitPath[2]}`;
 
   switch (request.method) {
     case 'GET':

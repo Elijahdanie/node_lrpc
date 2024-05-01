@@ -22,7 +22,7 @@ const getTypeDefinitions = (type, isMedia) => {
             typeDef += `\t\t\t${key}: ${data[key]};\n`
         }
         if(isMedia){
-            typeDef += `\t\t\tfiles: any[];\n`
+            typeDef += `\t\t\tfiles: File[];\n`
         }
         typeDef += '\t\t}';
         return typeDef;
@@ -235,7 +235,7 @@ const createFEClient = (LRPC)=>{
         }));
 
         let footer =
-`import axios from 'axios';\n\texport type Status = 'success' | 'error' | 'unauthorized' | 'notFound' | 'restricted' | 'validationError';`
+`\nimport FormData from 'form-data';\nimport axios from 'axios';\n\texport type Status = 'success' | 'error' | 'unauthorized' | 'notFound' | 'restricted' | 'validationError';`
 
 footer +=  `
     export const request = async (procedure: string, data: any) => {
