@@ -353,7 +353,7 @@ processControllers = async (controllers, app) => {
       const fetchMetaKeyforCallback = Reflect.getMetadata("callback", endpoint.prototype, "handler");
       // console.log(fetchMetaKeyforCallback, 'META');
       if(fetchMetaKeyforCallback){
-        const path = `/callbacks/${controller.replace('Controller', '')}/${endpoint.name}`;
+        const path = `/${controller.replace('Controller', '')}/${endpoint.name}`;
         app.use(path, this.processCallbacks);
       }
       LRPCEngine.instance.container.set(endpoint.name, new endpoint());

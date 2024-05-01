@@ -25,6 +25,10 @@ program
         // push the latest microservice configuration to the server
 
         // console.log(process.argv[3])
+        if(process.argv[3] === 'lrpc'){
+            console.log('Cannot create controller with name lrpc');
+            exit();
+        }
         createController(process.argv[3]);
         console.log('Created Controller');
         exit();
