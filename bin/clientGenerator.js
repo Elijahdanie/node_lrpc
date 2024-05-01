@@ -13,7 +13,7 @@ const getTypeDefinitions = (type, isMedia) => {
 
     if(!data){
         if(isMedia){
-            return `{\n\t\t\tfiles: File[];\n\t\t}`
+            return `{\n\t\t\tfiles: any[];\n\t\t}`
         }
         return 'any'
     } else {
@@ -22,7 +22,7 @@ const getTypeDefinitions = (type, isMedia) => {
             typeDef += `\t\t\t${key}: ${data[key]};\n`
         }
         if(isMedia){
-            typeDef += `\t\t\tfiles: File[];\n`
+            typeDef += `\t\t\tfiles: any[];\n`
         }
         typeDef += '\t\t}';
         return typeDef;
@@ -275,6 +275,7 @@ footer +=  `
                 for(const file of files){
                     formData.append('files', file);
                 }
+                formData.append('path', procedure);
                 const response = await axios.post(url, formData, {
                     headers: {
                         'Content-Type': 'multipart/form-data',
