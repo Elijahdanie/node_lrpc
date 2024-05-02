@@ -95,6 +95,14 @@ declare function initLRPC(
     service: string;
     app: Express;
     isGateway?: boolean;
+    cors?: {
+      origin?:  boolean | string | RegExp | Array<boolean | string | RegExp> | undefined;
+      methods?: string | string[] | undefined;
+      allowedHeaders?: string | string[] | undefined;
+      exposedHeaders?: string | string[] | undefined;
+      credentials?: boolean | undefined;
+      maxAge?: number | undefined;
+    };
   },
   authorize: (token: string, path: string, role: string[]) => any,
   controllers?,

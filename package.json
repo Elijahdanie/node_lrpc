@@ -1,6 +1,6 @@
 {
   "name": "@elijahdanie/lrpc",
-  "version": "0.0.34",
+  "version": "0.0.35",
   "type": "commonjs",
   "description": "This package helps services communicate with each other using redis",
   "main": "index.js",
@@ -16,6 +16,7 @@
   "dependencies": {
     "amqplib": "^0.10.3",
     "commander": "9.0.0",
+    "cors": "^2.8.5",
     "ioredis": "^5.3.2",
     "multer": "^1.4.5-lts.1",
     "reflect-metadata": "^0.2.2",

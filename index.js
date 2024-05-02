@@ -5,6 +5,8 @@ const { Redis } = require("ioredis");
 const  { genericListFetch, LRPCLimit, LRPCResource } = require('./decorators/auth.js')
 const { LRPCMedia} = require('./decorators/media.js')
 const { LRPCRedirect, LRPCCallback } = require('./decorators/url.js')
+const cors = require('cors');
+
 const multer = require('multer');
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
@@ -484,7 +486,7 @@ controllers,
 serviceClients,
 Container
 ) => {
-const { service, app, isGateway } = config;
+const { service, app, isGateway, corsConfig } = config;
 
 if(!process.env.HOSTNAME){
   console.warn('Please provide a HOSTNAME in your .env to ensure proper code generation');
@@ -502,6 +504,8 @@ LRPC.processQueueRequest();
 app.use("/lrpc", upload.array('files'), LRPC.processRequest);
 
 app.get("/client", LRPC.fetchScript);
+
+app.use(cors(corsConfig));
 
 createServiceClient(LRPC);
 createFEClient(LRPC);
