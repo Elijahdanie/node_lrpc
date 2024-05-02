@@ -7,6 +7,12 @@ export interface IEndpoint {
   validator: (input: any) => Promise<{ message: string; status: Status }>;
 }
 
+export interface IPermission {
+  limit: number;
+  resources: string[];
+}
+
+
 export type Status =
   | "success"
   | "error"
@@ -39,7 +45,7 @@ export interface LRPCRequest<T> {
     id: string;
     type: string;
     path: string;
-    permissions: any;
+    permissions: IPermission;
   };
 }
 
@@ -122,7 +128,7 @@ declare function LRPCFunction(
   response: any
 ): (target: any, name: string, descriptor: PropertyDescriptor) => void;
 
-declare function LRPCMedia ( fieldName: string ): (target: any, propertyKey: string, descriptor: PropertyDescriptor) => void
+declare function LRPCMedia (): (target: any, propertyKey: string, descriptor: PropertyDescriptor) => void
 
 declare function LRPCRedirect (url: string): (target: any, propertyKey: string, descriptor: PropertyDescriptor) => void
 

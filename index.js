@@ -96,9 +96,23 @@ fetchPayload = (request) => {
       }
     case 'POST':
       // Handle POST request
+      if(request.headers['content-type'].includes('multipart/form-data')){
+        const {path, ...data} = request.body;
+        return {
+          path,
+          data
+        }
+      }
       return request.body;
     case 'PUT':
       // Handle PUT request
+      if(request.headers['content-type'].includes('multipart/form-data')){
+        const {path, ...data} = request.body;
+        return {
+          path,
+          data
+        }
+      }
       return request.body;
     case 'DELETE':
       return {
@@ -219,7 +233,7 @@ processRequest = async (req, res) => {
       );
 
       if (authResponse.status !== "success") {
-        console.log(authResponse);
+        // console.log(authResponse);
         res.status(200).json(authResponse);
         return;
       }
@@ -274,7 +288,7 @@ fetchScript = async (req, res) => {
   try {
   const token = req.headers.authorization;
 
-  console.log(token, secret, 'TOKEN');
+  // console.log(token, secret, 'TOKEN');
   if(!token || token !== secret){
     res.status(200).json({
       message: 'Unauthorized Access',
@@ -485,7 +499,7 @@ LRPC.processControllers(controllers, app);
 LRPC.processClientControllers(serviceClients);
 LRPC.processQueueRequest();
 
-app.use("/lrpc", upload.array('file'), LRPC.processRequest);
+app.use("/lrpc", upload.array('files'), LRPC.processRequest);
 
 app.get("/client", LRPC.fetchScript);
 

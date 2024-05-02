@@ -270,7 +270,8 @@ footer +=  `
             if(url){
                 const formData = new FormData();
                 for(const key in data){
-                    formData.append(key, data[key]);
+                    // console.log(key, data[key])
+                    formData.append(key, data[key]); 
                 }
                 for(const file of files){
                     formData.append('files', file);
