@@ -119,7 +119,7 @@ declare function LRPCLimit(
 
 declare function LRPCResource (payloadKey?: string) : (target: any, propertyKey: string, descriptor: PropertyDescriptor) => void
 
-declare function genericListFetch (model: any, data: any, keyQuery: {[key: string]: any}, permissions, misc: {include?:any, attributes?:any} = {}): Promise<{
+declare function genericListFetch (model: any, data: any, keyQuery: {[key: string]: any}, permissions, misc: {include?:any, select?:any} = {}): Promise<{
   data: any;
   total: any;
   page: any;
