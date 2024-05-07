@@ -53,7 +53,7 @@ const generateClientCode = (controllerName, className, methodName, request, resp
 
 const generateFormDataUpload = (controllerName, className, methodName, request, response, LRPC) => {
     return `
-        static async ${className}(data: ${getTypeDefinitions(request.name, true)} | ${request.name}):Promise<${response.name}> {
+        static async ${className}(data: ${getTypeDefinitions(request.name, true)} | ${request.name}, onUploadProgress?: (progress: any) => void):Promise<${response.name}> {
 
             try {
 
@@ -61,7 +61,7 @@ const generateFormDataUpload = (controllerName, className, methodName, request, 
 
                 const { files, ...payload } = data as ${request.name} & { files: any[] };
 
-                const response = await formUpload(dataKey, payload, files);
+                const response = await formUpload(dataKey, payload, files, onUploadProgress);
 
                 return response.data;
             } catch (error) {
