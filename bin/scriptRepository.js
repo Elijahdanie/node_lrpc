@@ -46,7 +46,7 @@ export const request = async (procedure: string, data: any, url: string, token?:
         },
         {
             headers: {
-                Authorization: 'Bearer ' + token
+                Authorization: token
             }
         });
     return response;
