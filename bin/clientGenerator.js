@@ -266,7 +266,7 @@ footer +=  `
     export const formUpload = async (procedure: string, data: any, files: any[], onUploadProgress: (progress: any) => void) => {
             
             const token = process.env.TOKEN;
-            const url = process.env.GATEWAYURL;
+            const url = process.env.MEDIAURL;
             if(url){
                 const formData = new FormData();
                 for(const key in data){
