@@ -39,8 +39,8 @@ import { LRPCEngine } from '@elijahdanie/lrpc';
 
 export type Status = 'success' | 'error' | 'unauthorized' | 'notFound' | 'restricted' | 'validationError';
 
-export const request = async (procedure: string, data: any, token?: string) => {
-    const response = await axios.post('${process.env.HOSTNAME}', {
+export const request = async (procedure: string, data: any, url: string, token?: string) => {
+    const response = await axios.post(url, {
             path: procedure,
             data
         },

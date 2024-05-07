@@ -85,7 +85,7 @@ const generateServiceCode = (controllerName, className, methodName, request, res
     
                     const procedure = '${LRPC.service}.${controllerName}.${className}';
     
-                    const response = await request(procedure, data, token);
+                    const response = await request(procedure, data, '${process.env.HOSTNAME}', token);
     
                     return response.data;
                 } catch (error) {
