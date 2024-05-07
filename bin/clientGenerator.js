@@ -263,7 +263,7 @@ footer +=  `
         }
     }
 
-    export const formUpload = async (procedure: string, data: any, files: any[]) => {
+    export const formUpload = async (procedure: string, data: any, files: any[], onUploadProgress: (progress: any) => void) => {
             
             const token = process.env.TOKEN;
             const url = process.env.GATEWAYURL;
@@ -281,7 +281,8 @@ footer +=  `
                     headers: {
                         'Content-Type': 'multipart/form-data',
                         Authorization: token
-                    }
+                    },
+                    onUploadProgress
                 });
                 return response;
             } else {
