@@ -110,34 +110,37 @@ const fetchScriptRemote = async (environment, LRPC)=>{
             }
         }
     
-        export const formUpload = async (procedure: string, data: any, files: any[]) => {
-                
-                const token = process.env.TOKEN;
-                const url = process.env.GATEWAYURL;
-                if(url){
-                    const formData = new FormData();
-                    for(const key in data){
-                        formData.append(key, data[key]);
-                    }
-                    for(const file of files){
-                        formData.append('files', file);
-                    }
-                    const response = await axios.post(url, formData, {
-                        headers: {
-                            'Content-Type': 'multipart/form-data',
-                            Authorization: token
-                        }
-                    });
-                    return response;
-                } else {
-                    return {
-                        data: {
-                            message: 'Gateway URL not set',
-                            status: 'error'
-                        }
+        export const formUpload = async (procedure: string, data: any, files: any[], onUploadProgress: (progress: any) => void) => {
+            
+            const token = process.env.TOKEN;
+            const url = process.env.MEDIAURL;
+            if(url){
+                const formData = new FormData();
+                for(const key in data){
+                    // console.log(key, data[key])
+                    formData.append(key, data[key]); 
+                }
+                for(const file of files){
+                    formData.append('files', file);
+                }
+                formData.append('path', procedure);
+                const response = await axios.post(url, formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                        Authorization: token
+                    },
+                    onUploadProgress
+                });
+                return response;
+            } else {
+                return {
+                    data: {
+                        message: 'Gateway URL not set',
+                        status: 'error'
                     }
                 }
             }
+        }
     `
         scriptDictionary['index'] = footer;
 
