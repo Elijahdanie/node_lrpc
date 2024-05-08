@@ -95,7 +95,7 @@ declare function initLRPC(
     service: string;
     app: Express;
     isGateway?: boolean;
-    cors?: {
+    corsConfig?: {
       origin?:  boolean | string | RegExp | Array<boolean | string | RegExp> | undefined;
       methods?: string | string[] | undefined;
       allowedHeaders?: string | string[] | undefined;

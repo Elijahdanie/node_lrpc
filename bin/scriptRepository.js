@@ -87,8 +87,8 @@ const fetchScriptRemote = async (environment, LRPC)=>{
     footer +=  `
         export const request = async (procedure: string, data: any) => {
     
-            const token = process.env.TOKEN;
-            const url = process.env.GATEWAYURL;
+            const token = import.meta.env.VITE_TOKEN;
+            const url = process.env.VITE_GATEWAY_URL;
             if(url){
                 const response = await axios.post(url, {
                         path: procedure,
@@ -112,8 +112,8 @@ const fetchScriptRemote = async (environment, LRPC)=>{
     
         export const formUpload = async (procedure: string, data: any, files: any[], onUploadProgress: (progress: any) => void) => {
             
-            const token = process.env.TOKEN;
-            const url = process.env.MEDIAURL;
+            const token = import.meta.env.VITE_TOKEN;
+            const url = import.meta.env.VITE_MEDIA_URL;
             if(url){
                 const formData = new FormData();
                 for(const key in data){
