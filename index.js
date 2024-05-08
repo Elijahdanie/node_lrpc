@@ -505,7 +505,7 @@ app.use("/lrpc", upload.array('files'), LRPC.processRequest);
 
 app.get("/client", LRPC.fetchScript);
 
-app.use(cors(corsConfig));
+app.use(cors());
 
 createServiceClient(LRPC);
 createFEClient(LRPC);
