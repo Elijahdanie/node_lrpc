@@ -486,6 +486,9 @@ controllers,
 serviceClients,
 Container
 ) => {
+
+app.use(cors(corsConfig));
+
 const { service, app, isGateway, corsConfig } = config;
 
 if(!process.env.HOSTNAME){
@@ -496,16 +499,16 @@ if(!process.env.GATEWAYURL){
   console.warn('Please provide a GATEWAYURL in your .env to ensure proper code generation');
 }
 
+
 const LRPC = new LRPCEngine(service, authorize, process.env.HOSTNAME, Container, isGateway);
 LRPC.processControllers(controllers, app);
 LRPC.processClientControllers(serviceClients);
 LRPC.processQueueRequest();
 
+
 app.use("/lrpc", upload.array('files'), LRPC.processRequest);
 
 app.get("/client", LRPC.fetchScript);
-
-app.use(cors());
 
 createServiceClient(LRPC);
 createFEClient(LRPC);
