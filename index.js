@@ -6,6 +6,7 @@ const  { genericListFetch, LRPCLimit, LRPCResource } = require('./decorators/aut
 const { LRPCMedia} = require('./decorators/media.js')
 const { LRPCRedirect, LRPCCallback } = require('./decorators/url.js')
 const cors = require('cors');
+const Auth = require('./auth/auth');
 
 const multer = require('multer');
 const storage = multer.memoryStorage();
@@ -559,6 +560,7 @@ LRPCAuth,
 LRPCProp,
 LRPCPropArray,
 LRPCEngine,
+Auth,
 initLRPC,
 genericListFetch,
 LRPCLimit,

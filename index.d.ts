@@ -55,6 +55,10 @@ declare class BaseResponse<T> {
   data?: T;
 }
 
+declare class Auth {
+  
+}
+
 declare class LRPCEngine {
   service: string;
   url: string;
