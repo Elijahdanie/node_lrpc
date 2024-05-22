@@ -1,8 +1,20 @@
-const { LRPCEngine } = require('../');
+
 const { appSecret } = require('../../../../lrpc.config');
 const jwt = require('jsonwebtoken');
 
+
+// const appSecret = process.env.JWT_SECRET;
+// console.log('obj', obj);
+
+console.log('appSecret', appSecret);
+
 class AuthService {
+
+    static init = () => {
+        const {LRPCEngine} = require('../index.js');
+        AuthService.redis = LRPCEngine.instance.redis;
+    }
+
     static cleanToken(token) {
         if (!token) return undefined;
 
@@ -12,11 +24,10 @@ class AuthService {
 
     static async verify(token, path) {
         try {
-            const properToken = Auth.cleanToken(token);
-
+            const properToken = AuthService.cleanToken(token);
             const decoded = jwt.verify(properToken, appSecret);
             const subScription = decoded.subscription;
-            const permissions = await LRPCEngine.instance.redis.get(subScription);
+            const permissions = await AuthService.redis.get(subScription);
 
             if (!permissions) {
                 return {
@@ -26,14 +37,13 @@ class AuthService {
             }
 
             const parsedPermissions = JSON.parse(permissions);
-            const result = Auth.fetchPermission(parsedPermissions, path);
+            const result = AuthService.fetchPermission(parsedPermissions, path);
 
             if (!result.allow) {
                 return { message: 'You are not authorized to access this endpoint, Upgrade your current plan', status: 'restricted' };
             }
 
             decoded.permissions = result;
-
             return { message: 'Authorized', status: 'success', data: decoded };
         } catch (error) {
             console.log(error);
@@ -44,13 +54,13 @@ class AuthService {
         }
     }
 
-    static async sign(data, exp) {
+    static sign(data, exp) {
         const token = jwt.sign(data, appSecret, { expiresIn: exp ? exp : '365d' });
         return `Bearer ${token}`;
     }
 
     static fetchPermission(permission, path) {
-        const { service, controller, endpoint } = Auth.parsePath(path);
+        const { service, controller, endpoint } = AuthService.parsePath(path);
 
         const restrictions = Object.keys(permission);
 

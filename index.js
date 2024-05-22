@@ -247,6 +247,8 @@ processRequest = async (req, res) => {
         metadataValue
       );
 
+      // console.log(authResponse, 'AUTH RESPONSE');
+
       if (authResponse.status !== "success") {
         // console.log(authResponse);
         res.status(200).json(authResponse);
@@ -529,6 +531,8 @@ app.listen(process.env.PORT, () => {
   console.log(`Server listening on port ${process.env.PORT}`);
 });
 
+AuthService.init();
+
 return LRPC;
 };
 
@@ -560,7 +564,7 @@ const LRPCFunction =
 
   // console.log(serviceHandlerPromises, 'setup');
 
-  return descriptor;
+  return descriptor; 
 };
 
 
