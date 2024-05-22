@@ -6,7 +6,7 @@ const  { genericListFetch, LRPCLimit, LRPCResource } = require('./decorators/aut
 const { LRPCMedia} = require('./decorators/media.js')
 const { LRPCRedirect, LRPCCallback } = require('./decorators/url.js')
 const cors = require('cors');
-const Auth = require('./auth/auth');
+const AuthService = require('./auth/auth');
 
 const multer = require('multer');
 const storage = multer.memoryStorage();
@@ -184,23 +184,29 @@ processRequest = async (req, res) => {
     if (!this.isLocal(path)) {
       const func = this.clientHandlers[path];
       // console.log(func, 'FUNCTION', this.clientHandlers);
-      if(func && func.auth){
-        const authResponse = await LRPCEngine.instance.authorize(
-          req.headers.authorization,
-          path,
-          func.auth,
-        );
+      // if(func && func.auth){
+      //   // const authResponse = await LRPCEngine.instance.authorize(
+      //   //   req.headers.authorization,
+      //   //   path,
+      //   //   func.auth,
+      //   // );
 
-        if (authResponse.status !== "success") {
-          res.status(200).json(authResponse);
-          return;
-        }
+      //   const authResponse = await AuthService.verify(
+      //     req.headers.authorization,
+      //     path,
+      //     func.auth,
+      //   );
+
+      //   if (authResponse.status !== "success") {
+      //     res.status(200).json(authResponse);
+      //     return;
+      //   }
   
-        context = authResponse.data;
-      }
+      //   context = authResponse.data;
+      // }
       if (func) {
-        const newToken = `LRPC ${JSON.stringify(context)} ${req.headers.authorization}`;
-        const response = await func.request(data, newToken);
+        // const newToken = `LRPC ${JSON.stringify(context)} ${req.headers.authorization}`;
+        const response = await func.request(data, req.headers.authorization);
         res.status(200).json(response);
         return;
       }
@@ -229,7 +235,13 @@ processRequest = async (req, res) => {
     // console.log(metadataValue);
 
     if (metadataValue) {
-      const authResponse = await LRPCEngine.instance.authorize(
+      // const authResponse = await LRPCEngine.instance.authorize(
+      //   req.headers.authorization,
+      //   path,
+      //   metadataValue
+      // );
+
+      const authResponse = await AuthService.verify(
         req.headers.authorization,
         path,
         metadataValue
@@ -560,7 +572,7 @@ LRPCAuth,
 LRPCProp,
 LRPCPropArray,
 LRPCEngine,
-Auth,
+AuthService,
 initLRPC,
 genericListFetch,
 LRPCLimit,

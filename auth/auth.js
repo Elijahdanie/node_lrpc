@@ -1,7 +1,7 @@
 const { LRPCEngine } = require('../');
 const { appSecret } = require('../../../../lrpc.config');
 
-class Auth {
+class AuthService {
     static cleanToken(token) {
         if (!token) return undefined;
 
@@ -19,8 +19,8 @@ class Auth {
 
             if (!permissions) {
                 return {
-                    allow: false,
-                    message: 'Unauthorized'
+                    message: 'Unauthorized',
+                    status: 'unauthorized'
                 };
             }
 
@@ -37,9 +37,9 @@ class Auth {
         } catch (error) {
             console.log(error);
             return {
-                allow: false,
-                message: 'Unauthorized'
-            };
+                message: 'Unable to authenticate user, please login again.',
+                status: 'unauthorized',
+            }
         }
     }
 
@@ -97,4 +97,4 @@ class Auth {
     }
 }
 
-module.exports = Auth;
+module.exports = AuthService;

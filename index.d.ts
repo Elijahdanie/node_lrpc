@@ -55,8 +55,10 @@ declare class BaseResponse<T> {
   data?: T;
 }
 
-declare class Auth {
-  
+declare class AuthService {
+
+  static verify: (token: string, path: string) => any;
+  static sign: (data: any) => string;
 }
 
 declare class LRPCEngine {
@@ -148,6 +150,7 @@ declare function LRPCCallback (target: any, propertyKey: string, descriptor: Pro
 
 export {
   LRPCEngine,
+  AuthService,
   LRPCAuth,
   LRPCPropArray,
   LRPCProp,
