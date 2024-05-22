@@ -1,5 +1,6 @@
 const { LRPCEngine } = require('../');
 const { appSecret } = require('../../../../lrpc.config');
+const jwt = require('jsonwebtoken');
 
 class AuthService {
     static cleanToken(token) {
