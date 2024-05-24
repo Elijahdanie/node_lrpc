@@ -504,8 +504,8 @@ Container
 
 const { service, app, isGateway, corsConfig } = config;
 
-if(!process.env.HOSTNAME){
-  console.warn('Please provide a HOSTNAME in your .env to ensure proper code generation');
+if(!process.env.SERVICEHOST){
+  console.warn('Please provide a SERVICEHOST in your .env to ensure proper code generation');
 }
 
 if(!process.env.GATEWAYURL){
@@ -514,7 +514,7 @@ if(!process.env.GATEWAYURL){
 
 app.use(cors(corsConfig));
 
-const LRPC = new LRPCEngine(service, authorize, process.env.HOSTNAME, Container, isGateway);
+const LRPC = new LRPCEngine(service, authorize, process.env.SERVICEHOST, Container, isGateway);
 LRPC.processControllers(controllers, app);
 LRPC.processClientControllers(serviceClients);
 LRPC.processQueueRequest();
