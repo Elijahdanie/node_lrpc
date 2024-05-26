@@ -77,7 +77,14 @@ processQueueRequest = async () => {
     const endpoint = this.handlers[path];
     const func = this.container.get(endpoint);
     if (func) {
-      const response = await func(data, token);
+      const response = await func(
+        {
+          request: {},
+          response: {},
+          payload: data,
+          context,
+        }
+      );
       if (response) {
         this.Queue.add({
           path: srcPath,
@@ -537,7 +544,7 @@ return LRPC;
 };
 
 const LRPCFunction =
-(controller, request, response, isAuth) =>
+(controller, request, response, service = false) =>
 (target, name, descriptor) => {
   serviceHandlerPromises.push(async () => {
     // const paramNames = LRPCEngine.getParameterNames(descriptor.value);
@@ -552,6 +559,7 @@ const LRPCFunction =
     );
 
     return {
+      service,
       methodName,
       name,
       request,

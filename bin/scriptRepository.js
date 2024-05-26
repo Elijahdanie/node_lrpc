@@ -88,7 +88,7 @@ const fetchScriptRemote = async (environment, LRPC)=>{
         export const request = async (procedure: string, data: any) => {
     
             const token = import.meta.env.VITE_TOKEN;
-            const url = process.env.VITE_GATEWAY_URL;
+            const url = import.meta.env.VITE_GATEWAY_URL;
             if(url){
                 const response = await axios.post(url, {
                         path: procedure,

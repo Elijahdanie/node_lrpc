@@ -139,7 +139,8 @@ declare function LRPCPropArray(type?: {
 declare function LRPCFunction(
   controller: string,
   request: any,
-  response: any
+  response: any,
+  service?: boolean
 ): (target: any, name: string, descriptor: PropertyDescriptor) => void;
 
 declare function LRPCMedia (): (target: any, propertyKey: string, descriptor: PropertyDescriptor) => void
