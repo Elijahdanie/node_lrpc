@@ -62,6 +62,7 @@ declare class BaseResponse<T> {
 
 declare class RabbitMq {
   sendToQueue: (queue: string, data: any) => void
+  add: (data) => void
 }
 
 declare class AuthService {
