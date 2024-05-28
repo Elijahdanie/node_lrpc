@@ -53,7 +53,7 @@ constructor(
   this.isGateway = isGateway;
 
   try {
-    this.Queue = new RabbitMq(this.environment, { server: process.env.RABBITMQ_URL });
+    this.Queue = new RabbitMq(`${this.service}-${this.environment}`, { server: process.env.RABBITMQ_URL });
   } catch (error) {
     console.log(error);
   }
@@ -72,17 +72,17 @@ isLocal = (key) => {
 };
 
 processQueueRequest = async () => {
-  this.Queue.process(async ({ payload }, done) => {
-    const { path, data, srcPath, token } = payload;
+  this.Queue.process(async (payload, done) => {
+    try {
+      const { path, data, srcPath, token } = payload;
     const endpoint = this.handlers[path];
     const func = this.container.get(endpoint);
     if (func) {
-      const response = await func(
+      const response = await func.handler(
         {
           request: {},
           response: {},
-          payload: data,
-          context,
+          payload: data
         }
       );
       if (response) {
@@ -93,6 +93,9 @@ processQueueRequest = async () => {
         });
         done();
       }
+    }
+    } catch (error) {
+      done();
     }
   });
 };
@@ -190,27 +193,6 @@ processRequest = async (req, res) => {
 
     if (!this.isLocal(path)) {
       const func = this.clientHandlers[path];
-      // console.log(func, 'FUNCTION', this.clientHandlers);
-      // if(func && func.auth){
-      //   // const authResponse = await LRPCEngine.instance.authorize(
-      //   //   req.headers.authorization,
-      //   //   path,
-      //   //   func.auth,
-      //   // );
-
-      //   const authResponse = await AuthService.verify(
-      //     req.headers.authorization,
-      //     path,
-      //     func.auth,
-      //   );
-
-      //   if (authResponse.status !== "success") {
-      //     res.status(200).json(authResponse);
-      //     return;
-      //   }
-  
-      //   context = authResponse.data;
-      // }
       if (func) {
         // const newToken = `LRPC ${JSON.stringify(context)} ${req.headers.authorization}`;
         const response = await func.request(data, req.headers.authorization);
@@ -351,6 +333,7 @@ processClientControllers = async (serviceClients) => {
       });
     }
   ));
+
 };
 
 processCallbacks = async (req, res) => {
@@ -397,6 +380,8 @@ processControllers = async (controllers, app) => {
       LRPCEngine.instance.container.set(endpoint.name, new endpoint());
     });
   }));
+
+  // this.processQueueRequest();
 };
 
 static getParameterNames(func) {
@@ -526,7 +511,6 @@ LRPC.processControllers(controllers, app);
 LRPC.processClientControllers(serviceClients);
 LRPC.processQueueRequest();
 
-
 app.use("/lrpc", upload.array('files'), LRPC.processRequest);
 
 app.get("/client", LRPC.fetchScript);
@@ -552,6 +536,7 @@ const LRPCFunction =
     let methodName = target.constructor.name;
     const methodKey = `${LRPCEngine.instance.service}.${controller}.${methodName}`;
     await LRPCEngine.instance.registerCallback(methodKey, methodName);
+    // console.log(methodKey, 'methodKey');
     const metadataValue = Reflect.getMetadata(
       "auth",
       target,

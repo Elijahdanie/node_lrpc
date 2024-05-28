@@ -1,5 +1,5 @@
 import { Request, Response, Express } from "express";
-import { RabbitMq } from "./rabbitmq";
+// import { RabbitMq } from "./rabbitmq";
 import { Redis } from "ioredis";
 
 export interface IEndpoint {
@@ -53,6 +53,15 @@ declare class BaseResponse<T> {
   message: string;
   status: Status;
   data?: T;
+}
+
+// export interface RMQChannel {
+//   sendToQueue: (queue: string, data: any) => void
+//   consume: (queue, cb: (msg)=> void) => void
+// }
+
+declare class RabbitMq {
+  sendToQueue: (queue: string, data: any) => void
 }
 
 declare class AuthService {

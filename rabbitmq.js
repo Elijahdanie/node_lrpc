@@ -21,6 +21,7 @@ class RabbitMq {
     }
 
     consumeCallback;
+    connection;
 
     connect = () => {
         return new Promise((resolve, reject) => {
@@ -29,7 +30,9 @@ class RabbitMq {
                     return reject(error0);
                 }
 
-                connection.createChannel((error1, channel) => {
+                this.connection = connection;
+
+                this.connection.createChannel((error1, channel) => {
                     if (error1) {
                         return reject(error1);
                     }
@@ -45,7 +48,7 @@ class RabbitMq {
                     if (this.consumeCallback) {
                         this.channel.consume(this.queue, async (msg) => {
                             let data = JSON.parse(msg.content.toString());
-                            await this.consumeCallback({ data }, this.done);
+                            await this.consumeCallback(data, this.done);
 
                             // Send acknowledgment (ack) after processing
                             this.channel.ack(msg);
@@ -64,6 +67,16 @@ class RabbitMq {
 
     done() {
         // console.log('done with a queue item');
+    }
+
+    sendToQueue = (queue, message) => {
+        const finalMessage = {
+            data: message,
+            srcPath: this.queue,
+            path: queue,
+        }
+        this.channel.sendToQueue(queue, Buffer.from(JSON.stringify(finalMessage)));
+        console.log('Message sent to queue:', message, 'queue:', queue);
     }
 
     add = (data) => {
