@@ -75,16 +75,18 @@ processQueueRequest = async () => {
   this.Queue.process(async (payload, done) => {
     try {
       const { path, data, srcPath, token } = payload;
+      console.log(payload);
     const endpoint = this.handlers[path];
     const func = this.container.get(endpoint);
     if (func) {
-      const response = await func.handler(
+      await func.handler(
         {
           request: {},
           response: {},
           payload: data
         }
       );
+      done();
       // if (response) {
       //   this.Queue.add({
       //     path: srcPath,
@@ -95,7 +97,8 @@ processQueueRequest = async () => {
       // }
     }
     } catch (error) {
-      done();
+      console.log(error);
+      done(true);
     }
   });
 };

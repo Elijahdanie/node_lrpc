@@ -48,10 +48,16 @@ class RabbitMq {
                     if (this.consumeCallback) {
                         this.channel.consume(this.queue, async (msg) => {
                             let data = JSON.parse(msg.content.toString());
-                            await this.consumeCallback(data, this.done);
+                            await this.consumeCallback(data, (error)=>{
+                                if(!error){
+                                    this.channel.ack(msg);
+                                } else {
+                                    this.channel.nack(msg);
+                                }
+                            });
 
                             // Send acknowledgment (ack) after processing
-                            this.channel.ack(msg);
+                            
 
                         });
                     }
