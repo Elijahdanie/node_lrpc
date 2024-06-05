@@ -53,11 +53,7 @@ export const request = async (procedure: string, data: any, url: string, token?:
 }
 
 export const queue = async (service: string, procedure: string, data: any, token?: string): Promise<any> => {
-    const response = await LRPCEngine.instance.Queue.sendToQueue(service, {
-        path: procedure,
-        token,
-        data
-    });
+    const response = await LRPCEngine.instance.Queue.sendToQueue(service, data, procedure);
     return response;
 }
 `

@@ -85,14 +85,14 @@ processQueueRequest = async () => {
           payload: data
         }
       );
-      if (response) {
-        this.Queue.add({
-          path: srcPath,
-          data: response,
-          token,
-        });
-        done();
-      }
+      // if (response) {
+      //   this.Queue.add({
+      //     path: srcPath,
+      //     data: response,
+      //     token,
+      //   });
+      //   done();
+      // }
     }
     } catch (error) {
       done();
