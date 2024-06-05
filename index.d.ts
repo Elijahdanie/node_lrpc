@@ -61,7 +61,7 @@ declare class BaseResponse<T> {
 // }
 
 declare class RabbitMq {
-  sendToQueue: (queue: string, data: any) => void
+  sendToQueue: (queue: string, data: any, procedure: string) => void
   add: (data) => void
 }
 
