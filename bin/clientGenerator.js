@@ -101,8 +101,9 @@ const generateServiceCode = (controllerName, className, methodName, request, res
                     try {
         
                         const procedure = '${LRPC.service}.${controllerName}.${className}';
+                        const service = '${LRPC.service}-${LRPC.environment}';
         
-                        const response = queue(procedure, data, token);
+                        const response = queue(service, procedure, data, token);
         
                         resolve(response);
                     } catch (error) {

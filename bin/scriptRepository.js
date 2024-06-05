@@ -52,8 +52,8 @@ export const request = async (procedure: string, data: any, url: string, token?:
     return response;
 }
 
-export const queue = async (procedure: string, data: any, token?: string): Promise<any> => {
-    const response = await LRPCEngine.instance.Queue.add({
+export const queue = async (service: string, procedure: string, data: any, token?: string): Promise<any> => {
+    const response = await LRPCEngine.instance.Queue.sendQueue(service, {
         path: procedure,
         token,
         data
