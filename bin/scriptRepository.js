@@ -85,9 +85,13 @@ const fetchScriptRemote = async (environment, LRPC)=>{
     `import FormData from 'form-data';\nimport axios from 'axios';\n\texport type Status = 'success' | 'error' | 'unauthorized' | 'notFound' | 'restricted' | 'validationError';`
 
     footer +=  `
+
+        var token = '';
+        export const setToken = (Token: string) => {
+            token = Token;
+        }
         export const request = async (procedure: string, data: any) => {
     
-            const token = import.meta.env.VITE_TOKEN;
             const url = import.meta.env.VITE_GATEWAY_URL;
             if(url){
                 const response = await axios.post(url, {
@@ -112,7 +116,6 @@ const fetchScriptRemote = async (environment, LRPC)=>{
     
         export const formUpload = async (procedure: string, data: any, files: any[], onUploadProgress: (progress: any) => void) => {
             
-            const token = import.meta.env.VITE_TOKEN;
             const url = import.meta.env.VITE_MEDIA_URL;
             if(url){
                 const formData = new FormData();
