@@ -22,13 +22,23 @@ class AuthService {
         return tokenArray.length === 2 ? tokenArray[1] : undefined;
     }
 
+    static compatibility(data) {
+        const {id, subscriptions} = data;
+        if(subscriptions){
+            return 'subscription:Professional'
+        }
+    }
+
     static async verify(token, path) {
         try {
             const properToken = AuthService.cleanToken(token);
-            const decoded = jwt.verify(properToken, appSecret);
-            const subScription = decoded.subscription;
+            let decoded = jwt.verify(properToken, appSecret);
+            if(decoded.uE){
+                decoded = decoded.uE;
+            }
+            const subScription = decoded.subscription ? decoded.subscription
+                                                    : this.compatibility(decoded)
             const permissions = await AuthService.redis.get(subScription);
-
             if (!permissions) {
                 return {
                     message: 'Unauthorized',
@@ -39,7 +49,7 @@ class AuthService {
             const parsedPermissions = JSON.parse(permissions);
             const result = AuthService.fetchPermission(parsedPermissions, path);
 
-            if (!result.allow) {
+            if (result && !result.allow) {
                 return { message: 'You are not authorized to access this endpoint, Upgrade your current plan', status: 'restricted' };
             }
 

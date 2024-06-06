@@ -97,7 +97,7 @@ processQueueRequest = async () => {
       // }
     }
     } catch (error) {
-      console.log(error);
+      console.log(error.message);
       done(true);
     }
   });
