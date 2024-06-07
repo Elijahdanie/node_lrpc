@@ -433,10 +433,10 @@ const LRPCPayload =
   }
 
   let finalScript = '';
-
+  // console.log(script, 'script')
   // replicate the class
    finalScript = `class ${constructor.name} {
-${Object.keys(script).map(key => `\t${key}?: ${script[key]};`).join("\n")
+${Object.keys(script).map(key => `\t${key}${script[key].optional ? '?' : ''}: ${script[key].type};`).join("\n")
   }
 }`;
 
@@ -445,7 +445,7 @@ ${Object.keys(script).map(key => `\t${key}?: ${script[key]};`).join("\n")
   if(isResponse){
       finalScript = `class ${constructor.name}{\n\tmessage: string\n\tstatus: Status\n\tdata: {\n`;
       finalScript += `
-${Object.keys(script).map(key => `\t\t${key}?: ${script[key]};`).join("\n")
+${Object.keys(script).map(key => `\t\t${key}${script[key].optional ? '?' : ''}: ${script[key].type};`).join("\n")
   }\n\t}\n}
   `
   }
@@ -456,6 +456,22 @@ ${Object.keys(script).map(key => `\t\t${key}?: ${script[key]};`).join("\n")
   typeLibrary[path][constructor.name] = finalScript;
 };
 
+const LRPCPropOp = (target, key) => {
+  const propertyType = Reflect.getMetadata("design:type", target, key);
+  const className = target.constructor.name;
+
+  // check if the proprty type is not a primitive type
+  const isPrimitive = ["String", "Number", "Boolean", "Object"].includes(propertyType.name);
+
+  propAccumulator[className] = {
+      ...propAccumulator[className],
+      [key]: {
+          type: isPrimitive ? propertyType.name.toLowerCase() : propertyType.name,
+          optional: true
+      }
+  }
+}
+
 const LRPCProp = (target, key) => {
   const propertyType = Reflect.getMetadata("design:type", target, key);
   const className = target.constructor.name;
@@ -465,11 +481,14 @@ const LRPCProp = (target, key) => {
 
   propAccumulator[className] = {
       ...propAccumulator[className],
-      [key]: isPrimitive ? propertyType.name.toLowerCase() : propertyType.name
+      [key]: {
+          type: isPrimitive ? propertyType.name.toLowerCase() : propertyType.name,
+          optional: false
+      }
   }
 }
 
-const LRPCPropArray = (type) => (target, key) => {
+const LRPCPropArray = (type, isoptional) => (target, key) => {
   const className = target.constructor.name;
 
   if(type) {
@@ -479,12 +498,18 @@ const LRPCPropArray = (type) => (target, key) => {
 
     propAccumulator[className] = {
         ...propAccumulator[className],
-        [key]: `${finalType}[]`
+        [key]: {
+            type: `${finalType}[]`,
+            optional: isoptional
+        }
     }
   } else {
     propAccumulator[className] = {
         ...propAccumulator[className],
-        [key]: 'any[]'
+        [key]: {
+            type: 'any[]',
+            optional: isoptional
+        }
     }
   }
 }
@@ -579,5 +604,6 @@ LRPCLimit,
 LRPCResource,
 LRPCMedia,
 LRPCCallback,
-LRPCRedirect
+LRPCRedirect,
+LRPCPropOp
 };

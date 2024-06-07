@@ -19,7 +19,7 @@ const getTypeDefinitions = (type, isMedia) => {
     } else {
         let typeDef = '{\n';
         for (const key in data) {
-            typeDef += `\t\t\t${key}: ${data[key]};\n`
+            typeDef += `\t\t\t${key}${data[key].isoptional ? '?' : ''}: ${data[key].type};\n`
         }
         if (isMedia) {
             typeDef += `\t\t\tfiles: any[];\n`
@@ -45,7 +45,7 @@ const generateClientCode = (controllerName, className, methodName, request, resp
                 return {
                     message: (error as any).message,
                     status: 'error',
-                    data: {}
+                    data: {} as any
                 }
             }
         }`
@@ -68,7 +68,7 @@ const generateFormDataUpload = (controllerName, className, methodName, request, 
                 return {
                     message: (error as any).message,
                     status: 'error',
-                    data: {}
+                    data: {} as any
                 }
             }
         }`
@@ -92,7 +92,7 @@ const generateServiceCode = (controllerName, className, methodName, request, res
                     return {
                         message: (error as any).message,
                         status: 'error',
-                        data: {}
+                        data: {} as any
                     }
                 }
             },

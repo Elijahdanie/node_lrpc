@@ -126,7 +126,9 @@ declare function initLRPC(
   Container?
 ): LRPCEngine;
 
-declare function LRPCProp(target: any, key: string): void;
+declare function LRPCPropOp (target: any, key: string): void;
+
+declare function LRPCProp (target: any, key: string): void;
 
 declare function LRPCLimit(
   model: any,
@@ -144,7 +146,7 @@ declare function genericListFetch (model: any, data: any, keyQuery: {[key: strin
 
 declare function LRPCPropArray(type?: {
   new (): any;
-}): (target: any, key: string) => void;
+}, isoptional: boolean = false): (target: any, key: string) => void;
 
 declare function LRPCFunction(
   controller: string,
@@ -174,5 +176,6 @@ export {
   genericListFetch,
   LRPCMedia,
   LRPCRedirect,
-  LRPCCallback
+  LRPCCallback,
+  LRPCPropOp
 };
