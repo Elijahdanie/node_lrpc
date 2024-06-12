@@ -7,6 +7,7 @@ const { LRPCMedia} = require('./decorators/media.js')
 const { LRPCRedirect, LRPCCallback } = require('./decorators/url.js')
 const cors = require('cors');
 const AuthService = require('./auth/auth');
+const {Socket} = require('socket.io');
 
 const multer = require('multer');
 const storage = multer.memoryStorage();
@@ -36,12 +37,15 @@ authorize;
 Queue;
 redis;
 isGateway;
+io;
+socketConfig;
 
 constructor(
   service,
   authorize,
   url,
   Container,
+  socketConfig,
   isGateway = false
 ) {
   if (LRPCEngine.instance) {
@@ -51,6 +55,7 @@ constructor(
   this.service = service;
   this.environment = `${process.env.NODE_ENV}`;
   this.isGateway = isGateway;
+  this.socketConfig = socketConfig;
 
   try {
     this.Queue = new RabbitMq(`${this.service}-${this.environment}`, { server: process.env.RABBITMQ_URL });
@@ -70,6 +75,26 @@ constructor(
 isLocal = (key) => {
   return key.split(".")[0] === this.service;
 };
+
+initSocket = (server) => {
+  this.io = new Socket(server);
+  this.io.on('connection', async (socket) => {
+    if(!socketConfig.onConnection){
+      console.log('Please provide an onConnection function in your socket config');
+      return;
+    }
+    await socketConfig.onConnection(this.io, socket);
+    socket.on('disconnect', async () => {
+      console.log('disconnected');
+      if(!socketConfig.onDisconnection){
+        console.log('Please provide an onDisconnection function in your socket config');
+        return;
+      }
+      await socketConfig.onDisconnection(this.io, socket);
+    });
+  });
+
+}
 
 processQueueRequest = async () => {
   this.Queue.process(async (payload, done) => {
@@ -519,7 +544,8 @@ config,
 authorize,
 controllers,
 serviceClients,
-Container
+Container,
+socketConfig
 ) => {
 
 const { service, app, isGateway, corsConfig } = config;
@@ -534,7 +560,7 @@ if(!process.env.GATEWAYURL){
 
 app.use(cors(corsConfig));
 
-const LRPC = new LRPCEngine(service, authorize, process.env.SERVICEHOST, Container, isGateway);
+const LRPC = new LRPCEngine(service, authorize, process.env.SERVICEHOST, Container, socketConfig, isGateway);
 LRPC.processControllers(controllers, app);
 LRPC.processClientControllers(serviceClients);
 LRPC.processQueueRequest();
@@ -545,6 +571,10 @@ app.get("/client", LRPC.fetchScript);
 
 createServiceClient(LRPC);
 createFEClient(LRPC);
+
+if(socketConfig && socketConfig.onConnection && socketConfig.onDisconnection){
+  LRPC.initSocket(app);
+}
 
 app.listen(process.env.PORT, () => {
   console.log(`Server listening on port ${process.env.PORT}`);

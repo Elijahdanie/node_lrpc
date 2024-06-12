@@ -88,6 +88,7 @@ declare class LRPCEngine {
   ) => { message: string; status: Status; data?: any };
   Queue: RabbitMq;
   redis: Redis;
+  initSocket: (server: any) => void;
   isLocal: (key: string) => boolean;
   processQueueRequest: () => Promise<void>;
   processRequest: (req: Request, res: Response) => Promise<void>;
@@ -123,7 +124,11 @@ declare function initLRPC(
   authorize: (token: string, path: string, role: string[]) => any,
   controllers?,
   serviceClients?,
-  Container?
+  Container?,
+  socketConfig?: {
+    onConnection: (socketServer, socketClient) => Promise<void>;
+    onDisconnection: (socketServer, socketClient, data) => Promise<void>;
+  }
 ): LRPCEngine;
 
 declare function LRPCPropOp (target: any, key: string): void;
