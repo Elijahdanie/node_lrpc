@@ -83,6 +83,7 @@ initSocket = (server) => {
       console.log('Please provide an onConnection function in your socket config');
       return;
     }
+    const token = socket.handshake.query.token;
     await socketConfig.onConnection(this.io, socket);
     socket.on('disconnect', async () => {
       console.log('disconnected');
@@ -91,6 +92,10 @@ initSocket = (server) => {
         return;
       }
       await socketConfig.onDisconnection(this.io, socket);
+    });
+
+    socket.on('message', async (payload) => {
+      const { path, data, token } = payload;
     });
   });
 
@@ -497,6 +502,22 @@ const LRPCPropOp = (target, key) => {
   }
 }
 
+const LRPCObjectProp = (_value, optional) => (target, key) => {
+  const className = target.constructor.name;
+
+  const isPrimitive = ["String", "Number", "Boolean", "Object"].includes(_value.name);
+
+  const finalType = isPrimitive ? _value.name.toLowerCase() : _value.name;
+
+  propAccumulator[className] = {
+    ...propAccumulator[className],
+    [key]: {
+      type: `{ [key: string]: ${finalType} }`,
+      optional
+    }
+  };
+};
+
 const LRPCProp = (target, key) => {
   const propertyType = Reflect.getMetadata("design:type", target, key);
   const className = target.constructor.name;
@@ -635,5 +656,6 @@ LRPCResource,
 LRPCMedia,
 LRPCCallback,
 LRPCRedirect,
-LRPCPropOp
+LRPCPropOp,
+LRPCObjectProp
 };

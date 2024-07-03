@@ -135,6 +135,8 @@ declare function LRPCPropOp (target: any, key: string): void;
 
 declare function LRPCProp (target: any, key: string): void;
 
+declare function LRPCObjectProp (value: any, optional: boolean): (target: any, key: string) => void;
+
 declare function LRPCLimit(
   model: any,
   query?: string[]
@@ -182,5 +184,6 @@ export {
   LRPCMedia,
   LRPCRedirect,
   LRPCCallback,
-  LRPCPropOp
+  LRPCPropOp,
+  LRPCObjectProp
 };
