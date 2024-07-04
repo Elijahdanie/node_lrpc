@@ -556,7 +556,7 @@ const LRPCProp = (target, key) => {
 }
 
 const LRPCSocket = (target, key) => {
-  Reflect.defineMetadata("socket", "1", target, name);
+  Reflect.defineMetadata("socket", "1", target, key);
 }
 
 const LRPCPropArray = (type, isoptional) => (target, key) => {
