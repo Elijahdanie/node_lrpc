@@ -273,7 +273,7 @@ const createFEClient = (LRPC) => {
 
             const result = await request(procedure, data);
 
-            if(result.status !== 'success'){
+            if(result.data.status !== 'success'){
                 return result;
             }
 
@@ -288,7 +288,7 @@ const createFEClient = (LRPC) => {
                 });
             }
 
-            return result;
+            return result.data;
         } catch {
             return {
                 data: {
