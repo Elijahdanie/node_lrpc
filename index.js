@@ -39,6 +39,7 @@ redis;
 isGateway;
 io;
 socketConfig;
+clientSockets = {};
 
 constructor(
   service,
@@ -79,26 +80,46 @@ isLocal = (key) => {
 initSocket = (server) => {
   this.io = new Socket(server);
   this.io.on('connection', async (socket) => {
-    if(!socketConfig.onConnection){
-      console.log('Please provide an onConnection function in your socket config');
+    const token = socket.handshake.query.token;
+    const path = socket.handshake.query.path;
+
+    if(!token){
+      socket.disconnect();
       return;
     }
-    const token = socket.handshake.query.token;
-    await socketConfig.onConnection(this.io, socket);
+
+    const authResponse = await AuthService.verify(token, path, 'regular');
+
+    if(authResponse.status !== 'success'){
+      socket.disconnect();
+      return;
+    }
+
+    console.log('connected');
+
+    if(this.clientSockets[authResponse.data.id]){
+      this.clientSockets[authResponse.data.id].disconnect();
+    }
+
+    this.clientSockets[authResponse.data.id] = socket;
+
     socket.on('disconnect', async () => {
       console.log('disconnected');
-      if(!socketConfig.onDisconnection){
-        console.log('Please provide an onDisconnection function in your socket config');
-        return;
-      }
-      await socketConfig.onDisconnection(this.io, socket);
-    });
-
-    socket.on('message', async (payload) => {
-      const { path, data, token } = payload;
+      delete this.clientSockets[authResponse.data.id];
     });
   });
+}
 
+disconnectSocket = (id) => {
+  if(this.clientSockets[id]){
+    this.clientSockets[id].disconnect();
+  }
+}
+
+sendSocketMessage = (id, data) => {
+  if(this.clientSockets[id]){
+    this.clientSockets[id].emit('message', data);
+  }
 }
 
 processQueueRequest = async () => {
@@ -534,6 +555,10 @@ const LRPCProp = (target, key) => {
   }
 }
 
+const LRPCSocket = (target, key) => {
+  Reflect.defineMetadata("socket", "1", target, name);
+}
+
 const LRPCPropArray = (type, isoptional) => (target, key) => {
   const className = target.constructor.name;
 
@@ -631,6 +656,7 @@ const LRPCFunction =
       controller,
       isAuth: metadataValue,
       isMedia: Reflect.getMetadata("media", target, name),
+      isSocket: Reflect.getMetadata("socket", target, name) ? true : false
     };
   });
 
@@ -657,5 +683,6 @@ LRPCMedia,
 LRPCCallback,
 LRPCRedirect,
 LRPCPropOp,
-LRPCObjectProp
+LRPCObjectProp,
+LRPCSocket
 };

@@ -29,16 +29,16 @@ const getTypeDefinitions = (type, isMedia) => {
     }
 }
 
-const generateClientCode = (controllerName, className, methodName, request, response, LRPC) => {
+const generateClientCode = (controllerName, className, methodName, request, response, LRPC, isSocket) => {
 
     return `
-        static async ${className}(data: ${getTypeDefinitions(request.name)} | ${request.name}):Promise<${response.name}> {
+        static async ${className}(data: ${getTypeDefinitions(request.name)} | ${request.name}${isSocket ? "onMessage: (message) => void":""}):Promise<${response.name}> {
 
             try {
 
                 const dataKey = '${LRPC.service}.${controllerName}.${className}';
 
-                const response = await request(dataKey, data);
+                const response = ${!isSocket ? "await request(dataKey, data);":"await requestSocket(dataKey, data);"}
 
                 return response.data;
             } catch (error) {
@@ -204,7 +204,7 @@ const createFEClient = (LRPC) => {
                 const result = await p();
                 if(!result.service){
                 const { controller, methodName, name, request, response } = result;
-                const script = !result.isMedia ? generateClientCode(controller, methodName, name, request, response, LRPC)
+                const script = !result.isMedia ? generateClientCode(controller, methodName, name, request, response, LRPC, result.isSocket)
                     : generateFormDataUpload(controller, methodName, name, request, response, LRPC);
                 result.script = script;
                 // console.log(result.controller, 'done');
@@ -238,7 +238,7 @@ const createFEClient = (LRPC) => {
             }));
 
             let footer =
-                `\nimport FormData from 'form-data';\nimport axios from 'axios';\n\texport type Status = 'success' | 'error' | 'unauthorized' | 'notFound' | 'restricted' | 'validationError';`
+                `import io from 'socket.io-client';\nimport FormData from 'form-data';\nimport axios from 'axios';\n\texport type Status = 'success' | 'error' | 'unauthorized' | 'notFound' | 'restricted' | 'validationError';`
 
             footer += `
     export const request = async (procedure: string, data: any) => {
@@ -263,6 +263,24 @@ const createFEClient = (LRPC) => {
                     status: 'error'
                 }
             }
+        }
+    }
+
+    export const requestSocket = async (procedure: string, data: any, onMessage: (message: any) => void) => {
+        const token = process.env.TOKEN;
+        const url = ${Process.env.SERVICEHOST};
+
+        await request(procedure, data);
+
+        const socket = io(url, {
+                query: {
+                    token,
+                    path: procedure
+                }
+            });
+            socket.on(procedure, (message: any) => {
+                onMessage(message);
+            });
         }
     }
 

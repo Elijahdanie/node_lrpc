@@ -94,6 +94,8 @@ declare class LRPCEngine {
   processRequest: (req: Request, res: Response) => Promise<void>;
   processClientControllers: () => Promise<void>;
   processControllers: () => Promise<void>;
+  sendSocketMessage (id: string, data: any ): void
+  disconnectSocket (id: string ): void
   static getParameterNames(func: Function): string[];
   registerCallback: (methodKey: string, className: string) => Promise<void>;
 }
@@ -133,6 +135,8 @@ declare function initLRPC(
 
 declare function LRPCPropOp (target: any, key: string): void;
 
+declare function LRPCSocket (target: any, key: string): void;
+
 declare function LRPCProp (target: any, key: string): void;
 
 declare function LRPCObjectProp (value: any, optional: boolean): (target: any, key: string) => void;
@@ -168,6 +172,7 @@ declare function LRPCRedirect (url: string): (target: any, propertyKey: string, 
 
 declare function LRPCCallback (target: any, propertyKey: string, descriptor: PropertyDescriptor): void
 
+
 export {
   LRPCEngine,
   AuthService,
@@ -185,5 +190,6 @@ export {
   LRPCRedirect,
   LRPCCallback,
   LRPCPropOp,
-  LRPCObjectProp
+  LRPCObjectProp,
+  LRPCSocket
 };

@@ -78,7 +78,7 @@ const fetchScriptRemote = async (environment, LRPC)=>{
     });
 
     let footer =
-    `import FormData from 'form-data';\nimport axios from 'axios';\n\texport type Status = 'success' | 'error' | 'unauthorized' | 'notFound' | 'restricted' | 'validationError';`
+    `import io from 'socket.io-client';\nimport FormData from 'form-data';\nimport axios from 'axios';\n\texport type Status = 'success' | 'error' | 'unauthorized' | 'notFound' | 'restricted' | 'validationError';`
 
     footer +=  `
 
@@ -107,6 +107,23 @@ const fetchScriptRemote = async (environment, LRPC)=>{
                         status: 'error'
                     }
                 }
+            }
+        }
+
+        export const requestSocket = async (procedure: string, data: any, onMessage: (message: any) => void) => {
+            const url = ${Process.env.SERVICEHOST};
+
+            await request(procedure, data);
+
+            const socket = io(url, {
+                    query: {
+                        token,
+                        path: procedure
+                    }
+                });
+                socket.on(procedure, (message: any) => {
+                    onMessage(message);
+                });
             }
         }
     
