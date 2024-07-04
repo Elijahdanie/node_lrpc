@@ -286,10 +286,9 @@ const createFEClient = (LRPC) => {
             socket.on(procedure, (message: any) => {
                     onMessage(message);
                 });
-            }
 
-            return result.data;
-        } catch {
+                return result.data;
+            }  catch(error) {
             return {
                 data: {
                     message: 'Failed to set up socket connection',
