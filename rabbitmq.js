@@ -82,7 +82,7 @@ class RabbitMq {
             path: procedure,
         }
         this.channel.sendToQueue(queue, Buffer.from(JSON.stringify(finalMessage)));
-        console.log('Message sent to queue:', message, 'queue:', queue);
+        // console.log('Message sent to queue:', message, 'queue:', queue);
     }
 
     add = (data) => {

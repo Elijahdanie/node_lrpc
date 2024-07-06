@@ -269,7 +269,7 @@ const createFEClient = (LRPC) => {
     export const requestSocket = async (procedure: string, data: any, onMessage: (message: any) => void) => {
         try {
             const token = process.env.TOKEN;
-            const url = "${process.env.SERVICEHOST}";
+            const url = "${process.env.SERVICEHOST.replace('/lrpc', '')}";
 
             const result = await request(procedure, data);
 
@@ -278,16 +278,17 @@ const createFEClient = (LRPC) => {
             }
 
             const socket = io(url, {
-                    query: {
-                        token,
-                        path: procedure
-                    }
-                });
-            socket.on(procedure, (message: any) => {
-                    onMessage(message);
-                });
+                query: {
+                    token,
+                    path: procedure
+                }
+            });
+            socket.on('message', (message: any) => {
+                onMessage(message);
+            });
+            socket.connect();
 
-                return result.data;
+                return result;
             }  catch(error) {
             return {
                 data: {
