@@ -24,6 +24,7 @@ const { typeLibrary,
 const { fetchScriptRemote } = require("./bin/scriptRepository");
 const { secret } = require("../../../lrpc.config.js");
 
+const sockcetHandlerPromises = [];
 
 class LRPCEngine {
   service;
@@ -32,6 +33,7 @@ class LRPCEngine {
   url;
   handlers = {};
   clientHandlers = {};
+  socketHandlers = {};
   static instance;
   static trackInstance = 0;
   authorize;
@@ -103,10 +105,23 @@ class LRPCEngine {
 
       this.clientSockets[authResponse.data.id] = socket;
 
-      socket.on('disconnect', async () => {
-        console.log('disconnected', authResponse.data.id);
-        delete this.clientSockets[authResponse.data.id];
+      const endpoint = this.handlers[path];
+      const func = this.container.get(endpoint);
+
+      // if (func) {
+        await func.onSocket(authResponse.data.id, 'connect');
+      // }
+
+      socket.on('message', async (data) => {
+        await func.onSocket(authResponse.data.id, 'message', data);
       });
+
+      socket.on('disconnect', async () => {
+        delete this.clientSockets[authResponse.data.id];
+        await func.onSocket(authResponse.data.id, 'disconnect');
+      });
+
+      // invoke on connection
     });
 
     return server;
@@ -557,8 +572,14 @@ const LRPCProp = (target, key) => {
   }
 }
 
-const LRPCSocket = (target, key) => {
+const LRPCSocket  = (target, key) => {
   Reflect.defineMetadata("socket", "1", target, key);
+  // sockcetHandlerPromises.push(async () => {
+  //   // const methodName = target.constructor.name;
+  //   // const path = `${LRPCEngine.instance.service}.${controller}.${methodName}`;
+  //   Reflect.defineMetadata("socket", "1", target, key);
+  //   // LRPCEngine.instance.socketHandlers[path] = 
+  // });
 }
 
 const LRPCPropArray = (type, isoptional) => (target, key) => {
@@ -622,8 +643,9 @@ const initLRPC = (
 
   if(socketConfig){
   const server = LRPC.initSocket(app);
-  server.listen(process.env.PORT, () => {
+  server.listen(process.env.PORT, async () => {
     console.log(`Server/Websocket listening on port ${process.env.PORT}`);
+    await Promise.all(sockcetHandlerPromises);
   });
   } else {
     app.listen(process.env.PORT, () => {

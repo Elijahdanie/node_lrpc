@@ -24,6 +24,7 @@ export type Status =
 export interface HandlerConfig<T, U> {
   validator: (input: T) => Promise<{ message: string; status: Status }>;
   handler: (data: LRPCRequest<T>) => Promise<BaseResponse<U>>;
+  onSocket?: (id: string, status: 'connect' | 'disconnect' | 'message', data?: any) => Promise<void>;
 }
 
 export interface File {
@@ -135,6 +136,10 @@ declare function initLRPC(
 
 declare function LRPCPropOp (target: any, key: string): void;
 
+/**
+ * This creates a callback function in the endpoint method for clients
+ * You can implement onSocket method in the endpoint for handling events from clients
+ */
 declare function LRPCSocket (target: any, key: string): void;
 
 declare function LRPCProp (target: any, key: string): void;
