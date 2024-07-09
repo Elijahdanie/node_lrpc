@@ -111,35 +111,35 @@ const fetchScriptRemote = async (environment, LRPC)=>{
 
         export const requestSocket = async (procedure: string, data: any, onMessage: (message: any) => void) => {
             try {
-                const url = "${process.env.SERVICEHOST}";
+                const url = "${process.env.SERVICEHOST.replace('/lrpc', '')}";
 
                 const result = await request(procedure, data);
 
-                if(result.status !== 'success'){
+                if(result.data.status !== 'success'){
                     return result;
                 }
 
                 const socket = io(url, {
-                        query: {
-                            token,
-                            path: procedure
-                        }
-                    });
-                socket.on(procedure, (message: any) => {
-                        onMessage(message);
-                    });
-                }
+                    query: {
+                        token,
+                        path: procedure
+                    }
+                });
+                socket.on('message', (message: any) => {
+                    onMessage(message);
+                });
+                socket.connect();
 
-                return result;
-            } catch {
+                    return result;
+                }  catch(error) {
                 return {
                     data: {
                         message: 'Failed to set up socket connection',
                         status: 'error'
                     }
                 }
-            }
         }
+    }
     
         export const formUpload = async (procedure: string, data: any, files: any[], onUploadProgress: (progress: any) => void) => {
             
