@@ -3,11 +3,6 @@ const { appSecret } = require('../../../../lrpc.config');
 const jwt = require('jsonwebtoken');
 
 
-// const appSecret = process.env.JWT_SECRET;
-// console.log('obj', obj);
-
-console.log('appSecret', appSecret);
-
 class AuthService {
 
     static init = () => {

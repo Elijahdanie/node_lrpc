@@ -74,6 +74,7 @@ declare class AuthService {
 
 declare class LRPCEngine {
   service: string;
+  tId: string;
   url: string;
   handlers: {
     [key: string]: string;
@@ -109,6 +110,8 @@ declare function LRPCPayload(
   path: string,
   isResponse?: boolean
 ): <T extends { new (...args: any[]): {} }>(constructor: T) => void;
+
+declare function initWorkers(numberOfWorkers: number, __filename: string): void;
 
 declare function initLRPC(
   config: {
@@ -196,5 +199,6 @@ export {
   LRPCCallback,
   LRPCPropOp,
   LRPCObjectProp,
-  LRPCSocket
+  LRPCSocket,
+  initWorkers
 };

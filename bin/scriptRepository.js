@@ -7,7 +7,6 @@ const fetchScript = async (environment)=>{
     const redis = new Redis(redisUrl);
     
     const allServices = await redis.smembers(`server-${environment}`);
-    console.log(allServices, 'service')
     await Promise.all(allServices.map(async service =>{
         const script = await redis.get(`${service}-${environment}-s`);
         const folder = `./src/lrpc/serviceClients`;

@@ -9,6 +9,7 @@ const cors = require('cors');
 const AuthService = require('./auth/auth');
 const { Server } = require('socket.io');
 const { createServer } = require('http');
+const {workerData, parentPort, Worker} = require('worker_threads');
 
 const multer = require('multer');
 const storage = multer.memoryStorage();
@@ -28,6 +29,7 @@ const sockcetHandlerPromises = [];
 
 class LRPCEngine {
   service;
+  tId;
   environment;
   container;
   url;
@@ -128,6 +130,11 @@ class LRPCEngine {
   }
 
   disconnectSocket = (id) => {
+    // we need to understand if this socket has any other running process on this service
+    // before disconnecting
+
+    
+
     if (this.clientSockets[id]) {
       this.clientSockets[id].disconnect();
     }
@@ -136,6 +143,14 @@ class LRPCEngine {
   sendSocketMessage = (id, data) => {
     if (this.clientSockets[id]) {
       this.clientSockets[id].emit('message', data);
+    } else if(parentPort) {
+      parentPort.postMessage({
+        type: 'socket',
+        payload: {
+          id,
+          data
+        }
+      });
     }
   }
 
@@ -143,8 +158,10 @@ class LRPCEngine {
     this.Queue.process(async (payload, done) => {
       try {
         const { path, data, srcPath, token } = payload;
-        console.log(payload);
+        // console.log(payload);
         const endpoint = this.handlers[path];
+        if(parentPort)
+          console.log('Processing queue', path, endpoint, srcPath, this.tId);
         const func = this.container.get(endpoint);
         if (func) {
           await func.handler(
@@ -608,6 +625,32 @@ const LRPCPropArray = (type, isoptional) => (target, key) => {
   }
 }
 
+const initWorkers = async (number, __filename) => {
+  const workers = [];
+
+  if(parentPort) return;
+
+  if(!__filename){
+    __filename = process.env.NODE_ENV === 'dev' ? `../../../src/index.ts` : `../../../dist/index.js`;
+  }
+  for (let i = 0; i < number; i++) {
+    const worker = new Worker(__filename, {
+      workerData: {
+        id: i
+      }
+    });
+    worker.on('message', (message) => {
+      const {type, payload} = message;
+      if(type === 'socket'){
+        const {id, data} = payload;
+        LRPCEngine.instance.sendSocketMessage(id, data);
+      }
+    });
+    workers.push(worker);
+  }
+  return workers;
+}
+
 const initLRPC = (
   config,
   authorize,
@@ -630,6 +673,7 @@ const initLRPC = (
   app.use(cors(corsConfig));
 
   const LRPC = new LRPCEngine(service, authorize, process.env.SERVICEHOST, Container, socketConfig, isGateway);
+  LRPC.tId = workerData ? workerData.id : undefined;
   LRPC.processControllers(controllers, app);
   LRPC.processClientControllers(serviceClients);
   LRPC.processQueueRequest();
@@ -641,16 +685,21 @@ const initLRPC = (
   createServiceClient(LRPC);
   createFEClient(LRPC);
 
-  if(socketConfig){
-  const server = LRPC.initSocket(app);
-  server.listen(process.env.PORT, async () => {
-    console.log(`Server/Websocket listening on port ${process.env.PORT}`);
-    await Promise.all(sockcetHandlerPromises);
-  });
-  } else {
-    app.listen(process.env.PORT, () => {
-      console.log(`Server listening on port ${process.env.PORT}`);
+  if(!parentPort){
+    if(socketConfig){
+    const server = LRPC.initSocket(app);
+    server.listen(process.env.PORT, async () => {
+      console.log(`Server/Websocket listening on port ${process.env.PORT}`);
+      await Promise.all(sockcetHandlerPromises);
     });
+    } else {
+      app.listen(process.env.PORT, () => {
+        console.log(`Server listening on port ${process.env.PORT}`);
+      });
+    }
+  } else {
+    Promise.all(sockcetHandlerPromises);
+    // console.log(`Started service on thread ${workerData.id}`);
   }
 
   AuthService.init();
@@ -711,5 +760,6 @@ module.exports = {
   LRPCRedirect,
   LRPCPropOp,
   LRPCObjectProp,
-  LRPCSocket
+  LRPCSocket,
+  initWorkers
 };
