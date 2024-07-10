@@ -22,7 +22,7 @@ const { typeLibrary,
   serviceHandlerPromises,
   createServiceClient,
   createFEClient } = require("./bin/clientGenerator");
-const { fetchScriptRemote, fetchScript } = require("./bin/scriptRepository");
+const { fetchScriptRemote } = require("./bin/scriptRepository");
 const { secret } = require("../../../lrpc.config.js");
 
 const sockcetHandlerPromises = [];
@@ -683,7 +683,6 @@ const initLRPC = (
   app.get("/client", LRPC.fetchScript);
 
   createServiceClient(LRPC);
-  fetchScript(LRPC.environment);
   createFEClient(LRPC);
 
   if(!parentPort){

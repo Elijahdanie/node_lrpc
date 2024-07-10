@@ -241,6 +241,7 @@ const createFEClient = (LRPC) => {
                 `import io from 'socket.io-client';\nimport FormData from 'form-data';\nimport axios from 'axios';\n\texport type Status = 'success' | 'error' | 'unauthorized' | 'notFound' | 'restricted' | 'validationError';`
 
             footer += `
+    var socket: any;
     export const request = async (procedure: string, data: any) => {
 
         const token = process.env.TOKEN;
@@ -266,6 +267,12 @@ const createFEClient = (LRPC) => {
         }
     }
 
+    export const disconnectSocket = () => {
+        if(socket){
+            socket.disconnect();
+        }
+    }
+
     export const requestSocket = async (procedure: string, data: any, onMessage: (message: any) => void) => {
         try {
             const token = process.env.TOKEN;
@@ -277,7 +284,7 @@ const createFEClient = (LRPC) => {
                 return result;
             }
 
-            const socket = io(url, {
+            socket = io(url, {
                 query: {
                     token,
                     path: procedure

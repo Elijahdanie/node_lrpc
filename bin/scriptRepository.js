@@ -80,7 +80,7 @@ const fetchScriptRemote = async (environment, LRPC)=>{
     `import io from 'socket.io-client';\nimport FormData from 'form-data';\nimport axios from 'axios';\n\texport type Status = 'success' | 'error' | 'unauthorized' | 'notFound' | 'restricted' | 'validationError';`
 
     footer +=  `
-
+        var socket: any;
         var token = '';
         export const setToken = (Token: string) => {
             token = Token;
@@ -106,6 +106,12 @@ const fetchScriptRemote = async (environment, LRPC)=>{
                         status: 'error'
                     }
                 }
+            }
+        }
+
+        export const disconnectSocket = () => {
+            if(socket){
+                socket.disconnect();
             }
         }
 
