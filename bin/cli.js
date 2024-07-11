@@ -76,8 +76,8 @@ program
     .description('Pull service clients')
     .action(async () => {
         // push the latest microservice configuration to the server
-        
-        await fetchScript('dev');
+        const branch = process.env.NODE_ENV;
+        await fetchScript(branch ?  branch : 'dev');
         generateRegistry();
         console.log('Fetched Service Clients');
         exit();

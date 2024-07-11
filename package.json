@@ -1,6 +1,6 @@
 {
   "name": "@elijahdanie/lrpc",
-  "version": "0.0.87",
+  "version": "0.0.88",
   "type": "commonjs",
   "description": "This package helps services communicate with each other using redis",
   "main": "index.js",
