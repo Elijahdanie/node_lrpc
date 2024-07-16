@@ -38,7 +38,7 @@ const generateClientCode = (controllerName, className, methodName, request, resp
 
                 const dataKey = '${LRPC.service}.${controllerName}.${className}';
 
-                const response = ${!isSocket ? "await request(dataKey, data);":"await requestSocket(dataKey, data, onMessage);"}
+                const response = ${!isSocket ? "await request(dataKey, data);":`await requestSocket("${process.env.SERVICEHOST.replace('/lrpc', '')}", dataKey, data, onMessage);`}
 
                 return response.data;
             } catch (error) {
@@ -273,10 +273,9 @@ const createFEClient = (LRPC) => {
         }
     }
 
-    export const requestSocket = async (procedure: string, data: any, onMessage: (message: any) => void) => {
+    export const requestSocket = async (url: string, procedure: string, data: any, onMessage: (message: any) => void) => {
         try {
             const token = process.env.TOKEN;
-            const url = "${process.env.SERVICEHOST.replace('/lrpc', '')}";
 
             const result = await request(procedure, data);
 

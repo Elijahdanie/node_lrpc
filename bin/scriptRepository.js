@@ -115,9 +115,8 @@ const fetchScriptRemote = async (environment, LRPC)=>{
             }
         }
 
-        export const requestSocket = async (procedure: string, data: any, onMessage: (message: any) => void) => {
+        export const requestSocket = async (url: string, procedure: string, data: any, onMessage: (message: any) => void) => {
             try {
-                const url = "${process.env.SERVICEHOST.replace('/lrpc', '')}";
 
                 const result = await request(procedure, data);
 
