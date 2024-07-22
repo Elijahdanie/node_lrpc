@@ -122,7 +122,7 @@ const LRPCResource = (payloadKey) => (target, propertyKey, descriptor) => {
 const genericListFetch = async (model, data, keyQuery, permissions, misc = {}) => {
     
     const skip = (data.page - 1) * data.limit;
-    const take = data.limit * data.page;
+    const take = data.limit;
 
     const total = permissions.resources && permissions.resources.length > 0 ?
         await model.count({
