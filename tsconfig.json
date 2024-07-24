@@ -9,7 +9,7 @@
       "emitDecoratorMetadata": true,
       "sourceMap": false,
       "skipLibCheck": true,
-      "strictNullChecks": false,
+      "strictNullChecks": true,
       "pretty": true,
       "noImplicitAny": false,
       "resolveJsonModule": true,
