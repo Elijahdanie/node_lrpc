@@ -520,7 +520,7 @@ const LRPCPayload =
       let finalScript = '';
       // console.log(script, 'script')
       // replicate the class
-      finalScript = `class ${constructor.name} {
+      finalScript = `// @ts-ignore\nclass ${constructor.name} {
 ${Object.keys(script).map(key => `\t${key}${script[key].optional ? '?' : '!'}: ${script[key].type};`).join("\n")
         }
 }`;
@@ -528,7 +528,7 @@ ${Object.keys(script).map(key => `\t${key}${script[key].optional ? '?' : '!'}: $
       // console.log(finalScript);
 
       if (isResponse) {
-        finalScript = `class ${constructor.name}{\n\tmessage!: string\n\tstatus!: Status\n\tdata?: {\n`;
+        finalScript = `// @ts-ignore\nclass ${constructor.name}{\n\tmessage!: string\n\tstatus!: Status\n\tdata?: {\n`;
         finalScript += `
 ${Object.keys(script).map(key => `\t\t${key}${script[key].optional ? '?' : ''}: ${script[key].type};`).join("\n")
           }\n\t}\n}
