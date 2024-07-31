@@ -69,7 +69,8 @@ declare class RabbitMq {
 declare class AuthService {
 
   static verify: (token: string, path: string) => any;
-  static sign: (data: any) => string;
+  static verifyCustom: (token: string) => any;
+  static sign: (data: any, exp?: string) => string;
 }
 
 declare class LRPCEngine {

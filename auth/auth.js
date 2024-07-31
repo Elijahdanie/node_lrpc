@@ -24,6 +24,12 @@ class AuthService {
         }
     }
 
+    static async verifyCustom(token) {
+        let properToken = AuthService.cleanToken(token);
+        let decoded = jwt.verify(properToken, appSecret);
+        return decoded;
+    }
+
     static async verify(token, path) {
         try {
             const properToken = AuthService.cleanToken(token);
