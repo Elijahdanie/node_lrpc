@@ -560,6 +560,10 @@ const LRPCPropOp = (target, key) => {
 const LRPCObjectProp = (_value, optional) => (target, key) => {
   const className = target.constructor.name;
 
+  if(!_value || !_value.name){
+    _value = { name: 'any' };
+  }
+
   const isPrimitive = ["String", "Number", "Boolean", "Object"].includes(_value.name);
 
   const finalType = isPrimitive ? _value.name.toLowerCase() : _value.name;
@@ -568,6 +572,18 @@ const LRPCObjectProp = (_value, optional) => (target, key) => {
     ...propAccumulator[className],
     [key]: {
       type: `{ [key: string]: ${finalType} }`,
+      optional
+    }
+  };
+};
+
+const LRPCType = (_value, optional) => (target, key) => {
+  const className = target.constructor.name;
+
+  propAccumulator[className] = {
+    ...propAccumulator[className],
+    [key]: {
+      type: _value,
       optional
     }
   };
@@ -761,5 +777,6 @@ module.exports = {
   LRPCPropOp,
   LRPCObjectProp,
   LRPCSocket,
+  LRPCType,
   initWorkers
 };

@@ -59,7 +59,7 @@ const createEndpoint = (controller, endpoint) => {
     const repository = `${controller}Repository`;
 
     return`
-import {LRPCAuth, LRPCFunction, LRPCPayload } from "@elijahdanie/lrpc";
+import {LRPCProp, LRPCPropOp, LRPCAuth, LRPCFunction, LRPCPayload } from "@elijahdanie/lrpc";
 import { BaseResponse, HandlerConfig, LRPCRequest, Status, IEndpoint } from "@elijahdanie/lrpc";
 import ${repository} from "../${repository}";
 import Container, {Service} from "typedi";

@@ -149,6 +149,7 @@ declare function LRPCSocket (target: any, key: string): void;
 declare function LRPCProp (target: any, key: string): void;
 
 declare function LRPCObjectProp (value: any, optional: boolean): (target: any, key: string) => void;
+declare function LRPCType (value: any, optional: boolean): (target: any, key: string) => void;
 
 declare function LRPCLimit(
   model: any,
@@ -201,5 +202,6 @@ export {
   LRPCPropOp,
   LRPCObjectProp,
   LRPCSocket,
+  LRPCType,
   initWorkers
 };

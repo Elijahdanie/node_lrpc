@@ -62,7 +62,6 @@ fs.writeFileSync(utilsFile, utils);
 redis.disconnect();
 }
 
-
 const fetchScriptRemote = async (environment, LRPC)=>{
     const allServices = await LRPC.redis.smembers(`client-${environment}`);
     const scripts = await Promise.all(allServices.map(async service =>{
