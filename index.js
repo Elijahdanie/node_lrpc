@@ -45,8 +45,10 @@ class LRPCEngine {
   io;
   socketConfig;
   clientSockets = {};
+  application;
 
   constructor(
+    application,
     service,
     authorize,
     url,
@@ -58,6 +60,7 @@ class LRPCEngine {
       throw new Error("Cannot create multiple instances of LRPCEngine");
     }
     this.url = url;
+    this.application = application;
     this.service = service;
     this.environment = `${process.env.NODE_ENV}`;
     this.isGateway = isGateway;
@@ -676,7 +679,7 @@ const initLRPC = (
   socketConfig
 ) => {
 
-  const { service, app, isGateway, corsConfig } = config;
+  const { service, app, isGateway, corsConfig, application } = config;
 
   if (!process.env.SERVICEHOST) {
     console.warn('Please provide a SERVICEHOST in your .env to ensure proper code generation');
@@ -688,7 +691,7 @@ const initLRPC = (
 
   app.use(cors(corsConfig));
 
-  const LRPC = new LRPCEngine(service, authorize, process.env.SERVICEHOST, Container, socketConfig, isGateway);
+  const LRPC = new LRPCEngine(application, service, authorize, process.env.SERVICEHOST, Container, socketConfig, isGateway);
   LRPC.tId = workerData ? workerData.id : undefined;
   LRPC.processControllers(controllers, app);
   LRPC.processClientControllers(serviceClients);

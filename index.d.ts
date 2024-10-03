@@ -116,6 +116,7 @@ declare function initWorkers(numberOfWorkers: number, __filename: string): void;
 
 declare function initLRPC(
   config: {
+    application: string;
     service: string;
     app: Express;
     isGateway?: boolean;
@@ -158,7 +159,7 @@ declare function LRPCLimit(
 
 declare function LRPCResource (payloadKey?: string) : (target: any, propertyKey: string, descriptor: PropertyDescriptor) => void
 
-declare function genericListFetch (model: any, data: any, keyQuery: {[key: string]: any}, permissions, misc: {include?:any, select?:any} = {}): Promise<{
+declare function genericListFetch (model: any, data: any, keyQuery: {[key: string]: any}, permissions, misc: {include?:any, select?:any, orderBy?: any} = {}): Promise<{
   data: any;
   total: any;
   page: any;

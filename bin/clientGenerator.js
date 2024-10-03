@@ -186,8 +186,8 @@ const createServiceClient = (LRPC) => {
         //     fs.writeFileSync(`./src/lrpc/serviceClients/${LRPC.service}.ts`, serviceClient);
         fs.writeFileSync(`./src/lrpc/serviceClients/${LRPC.service}.access.json`, JSON.stringify({ [LRPC.service]: permissions }, null, 2));
         // LRPC.redis.set(`${LRPC.service}-${LRPC.environment}-p`)
-        LRPC.redis.set(`${LRPC.service}-${LRPC.environment}-s`, serviceClient);
-        LRPC.redis.sadd(`server-${LRPC.environment}`, LRPC.service);
+        LRPC.redis.set(`${LRPC.application}-${LRPC.service}-${LRPC.environment}-s`, serviceClient);
+        LRPC.redis.sadd(`${LRPC.application}-server-${LRPC.environment}`, LRPC.service);
     }, 1000);
 }
 
@@ -347,8 +347,8 @@ const createFEClient = (LRPC) => {
             }
             fs.writeFileSync(`./src/lrpc/clientsFE/${LRPC.service}.ts`, clientScript);
             fs.writeFileSync(`./src/lrpc/clientsFE/index.ts`, footer);
-            LRPC.redis.set(`${LRPC.service}-${LRPC.environment}-c`, clientScript);
-            LRPC.redis.sadd(`client-${LRPC.environment}`, LRPC.service);
+            LRPC.redis.set(`${LRPC.application}-${LRPC.service}-${LRPC.environment}-c`, clientScript);
+            LRPC.redis.sadd(`${LRPC.application}-client-${LRPC.environment}`, LRPC.service);
             resolve("done");
         }, 1000);
     });

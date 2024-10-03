@@ -1,23 +1,27 @@
 const fs = require('fs');
 const { Redis } = require("ioredis");
-const { redisUrl } = require('../../../../lrpc.config');
+const { redisUrl, application } = require('../../../../lrpc.config');
 
 const fetchScript = async (environment)=>{
     
     const redis = new Redis(redisUrl);
     
-    const allServices = await redis.smembers(`server-${environment}`);
+    const allServices = await redis.smembers(`${application}-server-${environment}`);
+
+    if(!fs.existsSync(`./src/lrpc`)){
+        fs.mkdirSync(`./src/lrpc`);
+    }
+
+    const folder = `./src/lrpc/serviceClients`;
+
+
+    if(!fs.existsSync(folder)){
+        fs.mkdirSync(folder);
+    }
+
     await Promise.all(allServices.map(async service =>{
-        const script = await redis.get(`${service}-${environment}-s`);
-        const folder = `./src/lrpc/serviceClients`;
+        const script = await redis.get(`${application}-${service}-${environment}-s`);
 
-        if(!fs.existsSync(`./src/lrpc`)){
-            fs.mkdirSync(`./src/lrpc`);
-        }
-
-        if(!fs.existsSync(folder)){
-            fs.mkdirSync(folder);
-        }
         fs.writeFileSync(`./src/lrpc/serviceClients/${service}.ts`, script);
     }));
     const indexFile = './src/lrpc/serviceClients/index.ts';
@@ -63,9 +67,9 @@ redis.disconnect();
 }
 
 const fetchScriptRemote = async (environment, LRPC)=>{
-    const allServices = await LRPC.redis.smembers(`client-${environment}`);
+    const allServices = await LRPC.redis.smembers(`${application}-client-${environment}`);
     const scripts = await Promise.all(allServices.map(async service =>{
-        const script = await LRPC.redis.get(`${service}-${environment}-c`);
+        const script = await LRPC.redis.get(`${application}-${service}-${environment}-c`);
         return script;
     }));
 

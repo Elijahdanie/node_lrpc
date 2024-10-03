@@ -59,13 +59,19 @@ program.command('init')
     .action(async () => {
         const config = `
 module.exports = {
+    application: default,
     service: 'my-service',
+    appSecret: 'YOUR JWT',
     secret: 'mysecret',
     redisUrl: 'redis://localhost:6379',
 }
 `
-        fs.writeFileSync('./lrpc.config.js', config);
-        console.log('Created LRPC config file');
+        if(!fs.existsSync('./lrpc.config.js')){
+            fs.writeFileSync('./lrpc.config.js', config);
+            console.log('Created LRPC config file');
+        } else {
+            console.log('Config file already exists');
+        }
         exit();
     });
 
