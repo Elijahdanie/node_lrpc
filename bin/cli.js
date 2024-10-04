@@ -76,12 +76,13 @@ module.exports = {
     });
 
 program
-    .command('pull')
+    .command('pull <resource>')
     .description('Pull service clients')
     .action(async () => {
         // push the latest microservice configuration to the server
+        const resource = process.argv[3];
         const branch = process.env.NODE_ENV;
-        await fetchScript(branch ?  branch : 'dev');
+        await fetchScript(branch ?  branch : 'dev', resource);
         generateRegistry();
         console.log('Fetched Service Clients');
         exit();
