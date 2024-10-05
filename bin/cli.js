@@ -38,7 +38,7 @@ program
     .action(() => {
         // push the latest microservice configuration to the server
         const controller = process.argv[3];
-        const endpoint = process.argv[4];
+        const endpoint = process.argv[4];b 
     const controllerPath = `src/controllers/${controller}`;
     if(!fs.existsSync(controllerPath)){
         console.log('Controller does not exist');
@@ -81,7 +81,7 @@ program
     .action(async () => {
         // push the latest microservice configuration to the server
         const branch = process.env.NODE_ENV;
-        await fetchScript(branch ?  branch : 'dev', resource);
+        await fetchScript(branch ?  branch : 'dev');
         generateRegistry();
         console.log('Fetched Service Clients');
         exit();
