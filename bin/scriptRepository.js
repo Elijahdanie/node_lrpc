@@ -2,24 +2,24 @@ const fs = require('fs');
 const { Redis } = require("ioredis");
 const { redisUrl, application } = require('../../../../lrpc.config');
 
-const fetchScript = async (environment)=>{
-    
+const fetchScript = async (environment) => {
+
     const redis = new Redis(redisUrl);
-    
+
     const allServices = await redis.smembers(`${application}-server-${environment}`);
 
-    if(!fs.existsSync(`./src/lrpc`)){
+    if (!fs.existsSync(`./src/lrpc`)) {
         fs.mkdirSync(`./src/lrpc`);
     }
 
     const folder = `./src/lrpc/serviceClients`;
 
 
-    if(!fs.existsSync(folder)){
+    if (!fs.existsSync(folder)) {
         fs.mkdirSync(folder);
     }
 
-    await Promise.all(allServices.map(async service =>{
+    await Promise.all(allServices.map(async service => {
         const script = await redis.get(`${application}-${service}-${environment}-s`);
 
         fs.writeFileSync(`./src/lrpc/serviceClients/${service}.ts`, script);
@@ -36,7 +36,7 @@ const serviceClients = {
  export default serviceClients;
 `;
 
-const utils = `
+    const utils = `
 import axios from 'axios';
 import { LRPCEngine } from '@elijahdanie/lrpc';
 
@@ -61,28 +61,29 @@ export const queue = async (service: string, procedure: string, data: any, token
 }
 `
 
-fs.writeFileSync(indexFile, content);
-fs.writeFileSync(utilsFile, utils);
-redis.disconnect();
+    fs.writeFileSync(indexFile, content);
+    fs.writeFileSync(utilsFile, utils);
+    redis.disconnect();
 }
 
-const fetchScriptRemote = async (environment, LRPC, resource)=>{
+const fetchScriptRemote = async (environment, LRPC, resource) => {
     const allServices = await LRPC.redis.smembers(`${application}-client-${environment}`);
-    const scripts = await Promise.all(allServices.map(async service =>{
+    console.log(allServices, 'allServices');
+    const scripts = await Promise.all(allServices.map(async service => {
         const script = await LRPC.redis.get(`${application}-${service}-${environment}-c`);
         return script;
     }));
 
     const scriptDictionary = {};
 
-    scripts.forEach((script, index)=>{
+    scripts.forEach((script, index) => {
         scriptDictionary[allServices[index]] = script;
     });
 
     let footer =
-    `import io from 'socket.io-client';\nimport FormData from 'form-data';\nimport axios from 'axios';\n\texport type Status = 'success' | 'error' | 'unauthorized' | 'notFound' | 'restricted' | 'validationError';`
+        `import io from 'socket.io-client';\nimport FormData from 'form-data';\nimport axios from 'axios';\n\texport type Status = 'success' | 'error' | 'unauthorized' | 'notFound' | 'restricted' | 'validationError';`
 
-    footer +=  `
+    footer += `
         var socket: any;
         var token = '';
         export const setToken = (Token: string) => {
@@ -180,18 +181,20 @@ const fetchScriptRemote = async (environment, LRPC, resource)=>{
             }
         }
     `
-        scriptDictionary['index'] = footer;
+    scriptDictionary['index'] = footer;
 
     // console.log(scriptDictionary, 'scripts');
 
     // return scriptDictionary;
-
-    const selectedScripts = {
-        index: scriptDictionary['index'],
-        [resource]: scriptDictionary[resource]
+    if (scriptDictionary[resource]) {
+        const selectedScripts = {
+            index: scriptDictionary['index'],
+            [resource]: scriptDictionary[resource]
+        }
+        return selectedScripts;
+    } else {
+        throw new Error('Resource not found');
     }
-
-    return selectedScripts;
 }
 
 // fetchScriptRemote('dev');

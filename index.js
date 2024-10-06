@@ -385,6 +385,7 @@ class LRPCEngine {
     try {
       const token = req.headers.authorization;
       const resource = req.query.resource;
+      console.log(resource, 'RESOURCE');
 
       if(!resource){
         res.status(200).json({
@@ -403,12 +404,19 @@ class LRPCEngine {
         return;
       }
 
-      const script = await fetchScriptRemote(this.environment, this, resource);
-      res.status(200).json({
-        message: 'Fetched script',
-        status: 'success',
-        data: script
-      });
+      try {
+        const script = await fetchScriptRemote(this.environment, this, resource);
+        res.status(200).json({
+          message: 'Fetched script',
+          status: 'success',
+          data: script
+        }); 
+      } catch (error) {
+        res.status(200).json({
+          message: 'Resource does not exist',
+          status: 'error'
+        });
+      }
 
 
     } catch (error) {
