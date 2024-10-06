@@ -422,10 +422,10 @@ lodash.once@^4.0.0:
   resolved "https://registry.yarnpkg.com/lodash.once/-/lodash.once-4.1.1.tgz#0dd3971213c7c56df880977d504c88fb471a97ac"
   integrity sha512-Sb487aTOCr9drQVL8pIxOzVhafOjZN9UU54hiN8PU3uAiSV7lx1yYNpbNmex2PK6dSJoNTSJUUswT651yww3Mg==
 
-lrpc-client@^0.0.11:
-  version "0.0.11"
-  resolved "https://registry.yarnpkg.com/lrpc-client/-/lrpc-client-0.0.11.tgz#ac6c0f07c1f7e1de9d1067ffcc130bb46792e9c6"
-  integrity sha512-dr/RuUGJFDsBjvJo5xNpXstLG6xAZrYHuK+g/H4/nU66Jh7BaRWzZQND0mr4UiI03ENzMKmGHz+qdvkkJYFjWg==
+lrpc-client@^0.0.12:
+  version "0.0.12"
+  resolved "https://registry.yarnpkg.com/lrpc-client/-/lrpc-client-0.0.12.tgz#7e0ce4fc0860f6d3dc62bc466f27e1ce8f2d8ad5"
+  integrity sha512-edV+8h4f+52RBRv0weIVAOFCxbTJDGvYa1pLYox5+l1lnY1ZwBwHuS8B1rw3A0s+GyWvXbuISZa5jkFD+rbFlQ==
   dependencies:
     axios "^1.6.8"
     commander "9.0.0"

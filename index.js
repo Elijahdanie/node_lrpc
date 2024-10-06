@@ -385,7 +385,6 @@ class LRPCEngine {
     try {
       const token = req.headers.authorization;
       const resource = req.query.resource;
-      console.log(resource, 'RESOURCE');
 
       if(!resource){
         res.status(200).json({

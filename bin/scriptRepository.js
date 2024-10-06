@@ -68,7 +68,7 @@ export const queue = async (service: string, procedure: string, data: any, token
 
 const fetchScriptRemote = async (environment, LRPC, resource) => {
     const allServices = await LRPC.redis.smembers(`${application}-client-${environment}`);
-    console.log(allServices, 'allServices');
+
     const scripts = await Promise.all(allServices.map(async service => {
         const script = await LRPC.redis.get(`${application}-${service}-${environment}-c`);
         return script;
@@ -193,6 +193,7 @@ const fetchScriptRemote = async (environment, LRPC, resource) => {
         }
         return selectedScripts;
     } else {
+        console.log(scriptDictionary[resource], resource, 'scripts');
         throw new Error('Resource not found');
     }
 }
