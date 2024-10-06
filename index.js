@@ -384,6 +384,15 @@ class LRPCEngine {
 
     try {
       const token = req.headers.authorization;
+      const resource = req.query.resource;
+
+      if(!resource){
+        res.status(200).json({
+          message: 'api Resource not specified',
+          status: 'error'
+        });
+        return;
+      }
 
       // console.log(token, secret, 'TOKEN');
       if (!token || token !== secret) {
@@ -394,7 +403,7 @@ class LRPCEngine {
         return;
       }
 
-      const script = await fetchScriptRemote(this.environment, this);
+      const script = await fetchScriptRemote(this.environment, this, resource);
       res.status(200).json({
         message: 'Fetched script',
         status: 'success',
