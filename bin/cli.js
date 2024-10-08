@@ -38,7 +38,7 @@ program
     .action(() => {
         // push the latest microservice configuration to the server
         const controller = process.argv[3];
-        const endpoint = process.argv[4];b 
+        const endpoint = process.argv[4];
     const controllerPath = `src/controllers/${controller}`;
     if(!fs.existsSync(controllerPath)){
         console.log('Controller does not exist');
