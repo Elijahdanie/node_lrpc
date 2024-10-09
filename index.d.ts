@@ -181,7 +181,7 @@ declare function LRPCMedia (): (target: any, propertyKey: string, descriptor: Pr
 
 declare function LRPCRedirect (url: string): (target: any, propertyKey: string, descriptor: PropertyDescriptor) => void
 
-declare function LRPCCallback (target: any, propertyKey: string, descriptor: PropertyDescriptor): void
+declare function LRPCCallback (): (target: any, propertyKey: string, descriptor: PropertyDescriptor) => void
 
 
 export {
