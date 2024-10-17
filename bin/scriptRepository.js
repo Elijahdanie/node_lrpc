@@ -2,6 +2,7 @@ const fs = require('fs');
 const { Redis } = require("ioredis");
 const { redisUrl, application } = require('../../../../lrpc.config');
 
+
 const fetchScript = async (environment) => {
 
     const redis = new Redis(redisUrl);

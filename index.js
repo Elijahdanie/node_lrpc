@@ -2,28 +2,35 @@ const path = require("path");
 const fs = require("fs");
 const { RabbitMq } = require("./rabbitmq");
 const { Redis } = require("ioredis");
-const { genericListFetch, LRPCLimit, LRPCResource } = require('./decorators/auth.js')
-const { LRPCMedia } = require('./decorators/media.js')
-const { LRPCRedirect, LRPCCallback } = require('./decorators/url.js')
-const cors = require('cors');
-const AuthService = require('./auth/auth');
-const { Server } = require('socket.io');
-const { createServer } = require('http');
-const {workerData, parentPort, Worker} = require('worker_threads');
+const {
+  genericListFetch,
+  LRPCLimit,
+  LRPCResource,
+} = require("./decorators/auth.js");
+const { LRPCMedia } = require("./decorators/media.js");
+const { LRPCRedirect, LRPCCallback } = require("./decorators/url.js");
+const cors = require("cors");
+const AuthService = require("./auth/auth");
+const { Server } = require("socket.io");
+const { createServer } = require("http");
+const { workerData, parentPort, Worker } = require("worker_threads");
 
-const multer = require('multer');
+const multer = require("multer");
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
 require("reflect-metadata");
 
-const { typeLibrary,
+const {
+  typeLibrary,
   propAccumulator,
   serviceHandlerPromises,
   createServiceClient,
-  createFEClient } = require("./bin/clientGenerator");
+  createFEClient,
+} = require("./bin/clientGenerator");
 const { fetchScriptRemote } = require("./bin/scriptRepository");
 const { secret } = require("../../../lrpc.config.js");
+const { subScribeEvent, LRPCEvent, EventManager, Events, Subscribers } = require("@elijahdanie/lrpc/logging/event.js");
 
 const sockcetHandlerPromises = [];
 
@@ -46,6 +53,7 @@ class LRPCEngine {
   socketConfig;
   clientSockets = {};
   application;
+  eventManager;
 
   constructor(
     application,
@@ -65,13 +73,15 @@ class LRPCEngine {
     this.environment = `${process.env.NODE_ENV}`;
     this.isGateway = isGateway;
     this.socketConfig = socketConfig;
+    this.eventManager = new EventManager(this);
 
     try {
-      this.Queue = new RabbitMq(`${this.service}-${this.environment}`, { server: process.env.RABBITMQ_URL });
+      this.Queue = new RabbitMq(`${this.service}-${this.environment}`, {
+        server: process.env.RABBITMQ_URL,
+      });
     } catch (error) {
       console.log(error);
     }
-
 
     this.redis = new Redis(process.env.REDIS_URL);
     this.authorize = authorize;
@@ -88,7 +98,7 @@ class LRPCEngine {
   initSocket = (app) => {
     const server = createServer(app);
     this.io = new Server(server);
-    this.io.on('connection', async (socket) => {
+    this.io.on("connection", async (socket) => {
       const token = socket.handshake.query.token;
       const path = socket.handshake.query.path;
 
@@ -97,9 +107,9 @@ class LRPCEngine {
         return;
       }
 
-      const authResponse = await AuthService.verify(token, path, 'regular');
+      const authResponse = await AuthService.verify(token, path, "regular");
 
-      if (authResponse.status !== 'success') {
+      if (authResponse.status !== "success") {
         socket.disconnect();
         return;
       }
@@ -114,48 +124,46 @@ class LRPCEngine {
       const func = this.container.get(endpoint);
 
       // if (func) {
-        await func.onSocket(authResponse.data.id, 'connect');
+      await func.onSocket(authResponse.data.id, "connect");
       // }
 
-      socket.on('message', async (data) => {
-        await func.onSocket(authResponse.data.id, 'message', data);
+      socket.on("message", async (data) => {
+        await func.onSocket(authResponse.data.id, "message", data);
       });
 
-      socket.on('disconnect', async () => {
+      socket.on("disconnect", async () => {
         delete this.clientSockets[authResponse.data.id];
-        await func.onSocket(authResponse.data.id, 'disconnect');
+        await func.onSocket(authResponse.data.id, "disconnect");
       });
 
       // invoke on connection
     });
 
     return server;
-  }
+  };
 
   disconnectSocket = (id) => {
     // we need to understand if this socket has any other running process on this service
     // before disconnecting
 
-    
-
     if (this.clientSockets[id]) {
       this.clientSockets[id].disconnect();
     }
-  }
+  };
 
   sendSocketMessage = (id, data) => {
     if (this.clientSockets[id]) {
-      this.clientSockets[id].emit('message', data);
-    } else if(parentPort) {
+      this.clientSockets[id].emit("message", data);
+    } else if (parentPort) {
       parentPort.postMessage({
-        type: 'socket',
+        type: "socket",
         payload: {
           id,
-          data
-        }
+          data,
+        },
       });
     }
-  }
+  };
 
   processQueueRequest = async () => {
     this.Queue.process(async (payload, done) => {
@@ -163,17 +171,16 @@ class LRPCEngine {
         const { path, data, srcPath, token } = payload;
         // console.log(payload);
         const endpoint = this.handlers[path];
-        if(parentPort)
-          console.log('Processing queue', path, endpoint, srcPath, this.tId);
+
+        if (parentPort)
+          console.log("Processing queue", path, endpoint, srcPath, this.tId);
         const func = this.container.get(endpoint);
         if (func) {
-          await func.handler(
-            {
-              request: {},
-              response: {},
-              payload: data
-            }
-          );
+          await func.handler({
+            request: {},
+            response: {},
+            payload: data,
+          });
           done();
           // if (response) {
           //   this.Queue.add({
@@ -184,6 +191,10 @@ class LRPCEngine {
           //   done();
           // }
         }
+
+        if (EventManager.instance.isSubscribed(path)) {
+          EventManager.instance.invokeEvent(path, data);
+        }
       } catch (error) {
         console.log(error.message);
         done(true);
@@ -193,77 +204,77 @@ class LRPCEngine {
 
   fetchPayload = (request) => {
     switch (request.method) {
-      case 'GET':
+      case "GET":
         return {
           path: request.query.path,
-          data: request.query.data ? JSON.parse(request.query.data) : null
-        }
-      case 'POST':
+          data: request.query.data ? JSON.parse(request.query.data) : null,
+        };
+      case "POST":
         // Handle POST request
-        if (request.headers['content-type'].includes('multipart/form-data')) {
+        if (request.headers["content-type"].includes("multipart/form-data")) {
           const { path, ...data } = request.body;
           return {
             path,
-            data
-          }
+            data,
+          };
         }
         return request.body;
-      case 'PUT':
+      case "PUT":
         // Handle PUT request
-        if (request.headers['content-type'].includes('multipart/form-data')) {
+        if (request.headers["content-type"].includes("multipart/form-data")) {
           const { path, ...data } = request.body;
           return {
             path,
-            data
-          }
+            data,
+          };
         }
         return request.body;
-      case 'DELETE':
+      case "DELETE":
         return {
           path: request.query.path,
-          data: request.query.data ? JSON.parse(request.query.data) : null
-        }
+          data: request.query.data ? JSON.parse(request.query.data) : null,
+        };
       default:
         // Handle other types of requests
         return null;
     }
-  }
+  };
 
   fetchDataFromCallback = (request) => {
     // construct path from request
-    const path = request.originalUrl.split('?');
+    const path = request.originalUrl.split("?");
     // remove the query part of the url
     const splitPath = path[0].split("/");
     const formatedPath = `${this.service}.${splitPath[1]}.${splitPath[2]}`;
 
     switch (request.method) {
-      case 'GET':
+      case "GET":
         return {
           path: formatedPath,
-          data: request.query
-        }
-      case 'POST':
+          data: request.query,
+        };
+      case "POST":
         // Handle POST request
         return {
           path: formatedPath,
-          data: request.body
-        }
-      case 'PUT':
+          data: request.body,
+        };
+      case "PUT":
         // Handle PUT request
         return {
           path: formatedPath,
-          data: request.body
-        }
-      case 'DELETE':
+          data: request.body,
+        };
+      case "DELETE":
         return {
           path: formatedPath,
-          data: request.query
-        }
+          data: request.query,
+        };
       default:
         // Handle other types of requests
         return null;
     }
-  }
+  };
 
   processRequest = async (req, res) => {
     // console.log(this.handlers);
@@ -276,8 +287,8 @@ class LRPCEngine {
 
       if (!path) {
         res.status(200).json({
-          message: 'Path not specified in payload',
-          status: 'error'
+          message: "Path not specified in payload",
+          status: "error",
         });
         return;
       }
@@ -370,6 +381,12 @@ class LRPCEngine {
       });
 
       if (response) res.status(200).json(response);
+
+      // invoke event
+      if(response && response.status === 'success') {
+        console.log('EVENTS');
+        this.eventManager.invokeEvent(path, data);
+      }
     } catch (error) {
       console.log(error);
       res.status(200).json({
@@ -381,15 +398,14 @@ class LRPCEngine {
   };
 
   fetchScript = async (req, res) => {
-
     try {
       const token = req.headers.authorization;
       const resource = req.query.resource;
 
-      if(!resource){
+      if (!resource) {
         res.status(200).json({
-          message: 'api Resource not specified',
-          status: 'error'
+          message: "api Resource not specified",
+          status: "error",
         });
         return;
       }
@@ -397,36 +413,37 @@ class LRPCEngine {
       // console.log(token, secret, 'TOKEN');
       if (!token || token !== secret) {
         res.status(200).json({
-          message: 'Unauthorized Access',
-          status: 'unauthorized'
+          message: "Unauthorized Access",
+          status: "unauthorized",
         });
         return;
       }
 
       try {
-        const script = await fetchScriptRemote(this.environment, this, resource);
+        const script = await fetchScriptRemote(
+          this.environment,
+          this,
+          resource
+        );
         res.status(200).json({
-          message: 'Fetched script',
-          status: 'success',
-          data: script
-        }); 
+          message: "Fetched script",
+          status: "success",
+          data: script,
+        });
       } catch (error) {
         res.status(200).json({
-          message: 'Resource does not exist',
-          status: 'error'
+          message: "Resource does not exist",
+          status: "error",
         });
       }
-
-
     } catch (error) {
       res.status(500).json({
-        message: 'internal server error'
-      })
+        message: "internal server error",
+      });
     }
-  }
+  };
 
   processClientControllers = async (serviceClients) => {
-
     await Promise.all(
       Object.keys(serviceClients).map(async (data) => {
         // console.log(data);
@@ -438,9 +455,8 @@ class LRPCEngine {
             this.clientHandlers[methodKey] = endpoint[key];
           });
         });
-      }
-      ));
-
+      })
+    );
   };
 
   processCallbacks = async (req, res) => {
@@ -459,34 +475,81 @@ class LRPCEngine {
 
     const classInstance = this.container.get(className);
 
+    let isValid = { message: "", status: "" };
+
+    try {
+      isValid = await classInstance.validator(data);
+    } catch (error) {
+      console.log(error);
+      res.status(200).json({
+        message: error.message,
+        status: "validationError",
+        // data: null
+      });
+      return;
+    }
+
+    if (isValid.status !== "success") {
+      res.status(200).json({
+        message: isValid.message,
+        status: isValid.status,
+        // data: null
+      });
+      return;
+    }
+
     const response = await classInstance.handler({
       request: req,
       response: res,
-      payload: data
+      payload: data,
     });
 
     if (response) res.status(200).json(response);
+    
+    if(response && response.status === 'success') {
+      this.eventManager.invokeEvent(path, data);
+    }
+  };
 
+  processEvents = async () => {
 
+    // events
+    // console.log('Processing Events', Events, Subscribers);
+    const redisKeyEvent = `${this.application}-events`;
+
+    await Promise.all(Events.map(async (event)=>{
+        LRPCEngine.instance.redis.sadd(redisKeyEvent, event);
+    }))
+
+    //subscribers
+    await Promise.all(Subscribers.map(async (subscriber)=>{
+      this.eventManager.registerEvent(`${subscriber}`);
+    }));
   }
-
 
   processControllers = async (controllers, app) => {
     // console.log(controllers);
-    await Promise.all(Object.keys(controllers).map(async (controller) => {
-
-      controllers[controller].forEach(async (endpoint) => {
-        // const methodKey = `${this.service}.${controller}.${endpoint.name}`;
-        // console.log(endpoint.name);
-        const fetchMetaKeyforCallback = Reflect.getMetadata("callback", endpoint.prototype, "handler");
-        // console.log(fetchMetaKeyforCallback, 'META');
-        if (fetchMetaKeyforCallback) {
-          const path = `/${controller.replace('Controller', '')}/${endpoint.name}`;
-          app.use(path, this.processCallbacks);
-        }
-        LRPCEngine.instance.container.set(endpoint.name, new endpoint());
-      });
-    }));
+    await Promise.all(
+      Object.keys(controllers).map(async (controller) => {
+        controllers[controller].forEach(async (endpoint) => {
+          // const methodKey = `${this.service}.${controller}.${endpoint.name}`;
+          // console.log(endpoint.name);
+          const fetchMetaKeyforCallback = Reflect.getMetadata(
+            "callback",
+            endpoint.prototype,
+            "handler"
+          );
+          // console.log(fetchMetaKeyforCallback, 'META');
+          if (fetchMetaKeyforCallback) {
+            const path = `/${controller.replace("Controller", "")}/${
+              endpoint.name
+            }`;
+            app.use(path, this.processCallbacks);
+          }
+          LRPCEngine.instance.container.set(endpoint.name, new endpoint());
+        });
+      })
+    );
 
     // this.processQueueRequest();
   };
@@ -509,81 +572,90 @@ class LRPCEngine {
   }
 }
 
-const LRPCAuth =
-  (roles) =>
-    (target, name, descriptor) => {
-      Reflect.defineMetadata("auth", roles ? roles : "regular", target, name);
-    };
+const LRPCAuth = (roles) => (target, name, descriptor) => {
+  Reflect.defineMetadata("auth", roles ? roles : "regular", target, name);
+};
 
 const LRPCPayload =
   (path, isResponse = false) =>
-    (constructor) => {
-      // console.log(constructor.name);
-      let script = propAccumulator[constructor.name];
+  (constructor) => {
+    // console.log(constructor.name);
+    let script = propAccumulator[constructor.name];
 
-      if (!script) {
-        script = {};
-      }
+    if (!script) {
+      script = {};
+    }
 
-      const derivedClass = Object.getPrototypeOf(constructor);
+    const derivedClass = Object.getPrototypeOf(constructor);
 
-      if (derivedClass.name) {
-        script = {
-          ...script,
-          ...propAccumulator[derivedClass.name]
-        }
+    if (derivedClass.name) {
+      script = {
+        ...script,
+        ...propAccumulator[derivedClass.name],
+      };
 
-        propAccumulator[constructor.name] = script;
-      }
+      propAccumulator[constructor.name] = script;
+    }
 
-      let finalScript = '';
-      // console.log(script, 'script')
-      // replicate the class
-      finalScript = `// @ts-ignore\nclass ${constructor.name} {
-${Object.keys(script).map(key => `\t${key}${script[key].optional ? '?' : '!'}: ${script[key].type};`).join("\n")
-        }
+    let finalScript = "";
+    // console.log(script, 'script')
+    // replicate the class
+    finalScript = `// @ts-ignore\nclass ${constructor.name} {
+${Object.keys(script)
+  .map(
+    (key) => `\t${key}${script[key].optional ? "?" : "!"}: ${script[key].type};`
+  )
+  .join("\n")}
 }`;
 
-      // console.log(finalScript);
+    // console.log(finalScript);
 
-      if (isResponse) {
-        finalScript = `// @ts-ignore\nclass ${constructor.name}{\n\tmessage!: string\n\tstatus!: Status\n\tdata?: {\n`;
-        finalScript += `
-${Object.keys(script).map(key => `\t\t${key}${script[key].optional ? '?' : ''}: ${script[key].type};`).join("\n")
-          }\n\t}\n}
-  `
-      }
+    if (isResponse) {
+      finalScript = `// @ts-ignore\nclass ${constructor.name}{\n\tmessage!: string\n\tstatus!: Status\n\tdata?: {\n`;
+      finalScript += `
+${Object.keys(script)
+  .map(
+    (key) =>
+      `\t\t${key}${script[key].optional ? "?" : ""}: ${script[key].type};`
+  )
+  .join("\n")}\n\t}\n}
+  `;
+    }
 
-      if (!typeLibrary[path]) {
-        typeLibrary[path] = {};
-      }
-      typeLibrary[path][constructor.name] = finalScript;
-    };
+    if (!typeLibrary[path]) {
+      typeLibrary[path] = {};
+    }
+    typeLibrary[path][constructor.name] = finalScript;
+  };
 
 const LRPCPropOp = (target, key) => {
   const propertyType = Reflect.getMetadata("design:type", target, key);
   const className = target.constructor.name;
 
   // check if the proprty type is not a primitive type
-  const isPrimitive = ["String", "Number", "Boolean", "Object"].includes(propertyType.name);
+  const isPrimitive = ["String", "Number", "Boolean", "Object"].includes(
+    propertyType.name
+  );
 
   propAccumulator[className] = {
     ...propAccumulator[className],
     [key]: {
       type: isPrimitive ? propertyType.name.toLowerCase() : propertyType.name,
-      optional: true
-    }
-  }
-}
+      optional: true,
+    },
+  };
+};
 
 const LRPCObjectProp = (_value, optional) => (target, key) => {
   const className = target.constructor.name;
 
-  if(!_value || !_value.name){
-    _value = { name: 'any' };
+  if (!_value || !_value.name) {
+    _value = { name: "any" };
   }
 
-  const isPrimitive = ["String", "Number", "Boolean", "Object"].includes(_value.name);
+  const isPrimitive = ["String", "Number", "Boolean", "Object"].includes(
+    _value.name
+  );
 
   const finalType = isPrimitive ? _value.name.toLowerCase() : _value.name;
 
@@ -591,8 +663,8 @@ const LRPCObjectProp = (_value, optional) => (target, key) => {
     ...propAccumulator[className],
     [key]: {
       type: `{ [key: string]: ${finalType} }`,
-      optional
-    }
+      optional,
+    },
   };
 };
 
@@ -603,8 +675,8 @@ const LRPCType = (_value, optional) => (target, key) => {
     ...propAccumulator[className],
     [key]: {
       type: _value,
-      optional
-    }
+      optional,
+    },
   };
 };
 
@@ -613,32 +685,36 @@ const LRPCProp = (target, key) => {
   const className = target.constructor.name;
 
   // check if the proprty type is not a primitive type
-  const isPrimitive = ["String", "Number", "Boolean", "Object"].includes(propertyType.name);
+  const isPrimitive = ["String", "Number", "Boolean", "Object"].includes(
+    propertyType.name
+  );
 
   propAccumulator[className] = {
     ...propAccumulator[className],
     [key]: {
       type: isPrimitive ? propertyType.name.toLowerCase() : propertyType.name,
-      optional: false
-    }
-  }
-}
+      optional: false,
+    },
+  };
+};
 
-const LRPCSocket  = (target, key) => {
+const LRPCSocket = (target, key) => {
   Reflect.defineMetadata("socket", "1", target, key);
   // sockcetHandlerPromises.push(async () => {
   //   // const methodName = target.constructor.name;
   //   // const path = `${LRPCEngine.instance.service}.${controller}.${methodName}`;
   //   Reflect.defineMetadata("socket", "1", target, key);
-  //   // LRPCEngine.instance.socketHandlers[path] = 
+  //   // LRPCEngine.instance.socketHandlers[path] =
   // });
-}
+};
 
 const LRPCPropArray = (type, isoptional) => (target, key) => {
   const className = target.constructor.name;
 
   if (type) {
-    const isPrimitive = ["String", "Number", "Boolean", "Object"].includes(type.name);
+    const isPrimitive = ["String", "Number", "Boolean", "Object"].includes(
+      type.name
+    );
 
     const finalType = isPrimitive ? type.name.toLowerCase() : type.name;
 
@@ -646,45 +722,48 @@ const LRPCPropArray = (type, isoptional) => (target, key) => {
       ...propAccumulator[className],
       [key]: {
         type: `${finalType}[]`,
-        optional: isoptional
-      }
-    }
+        optional: isoptional,
+      },
+    };
   } else {
     propAccumulator[className] = {
       ...propAccumulator[className],
       [key]: {
-        type: 'any[]',
-        optional: isoptional
-      }
-    }
+        type: "any[]",
+        optional: isoptional,
+      },
+    };
   }
-}
+};
 
 const initWorkers = async (number, __filename) => {
   const workers = [];
 
-  if(parentPort) return;
+  if (parentPort) return;
 
-  if(!__filename){
-    __filename = process.env.NODE_ENV === 'dev' ? `../../../src/index.ts` : `../../../dist/index.js`;
+  if (!__filename) {
+    __filename =
+      process.env.NODE_ENV === "dev"
+        ? `../../../src/index.ts`
+        : `../../../dist/index.js`;
   }
   for (let i = 0; i < number; i++) {
     const worker = new Worker(__filename, {
       workerData: {
-        id: i
-      }
+        id: i,
+      },
     });
-    worker.on('message', (message) => {
-      const {type, payload} = message;
-      if(type === 'socket'){
-        const {id, data} = payload;
+    worker.on("message", (message) => {
+      const { type, payload } = message;
+      if (type === "socket") {
+        const { id, data } = payload;
         LRPCEngine.instance.sendSocketMessage(id, data);
       }
     });
     workers.push(worker);
   }
   return workers;
-}
+};
 
 const initLRPC = (
   config,
@@ -694,39 +773,53 @@ const initLRPC = (
   Container,
   socketConfig
 ) => {
-
   const { service, app, isGateway, corsConfig, application } = config;
 
   if (!process.env.SERVICEHOST) {
-    console.warn('Please provide a SERVICEHOST in your .env to ensure proper code generation');
+    console.warn(
+      "Please provide a SERVICEHOST in your .env to ensure proper code generation"
+    );
   }
 
   if (!process.env.GATEWAYURL) {
-    console.warn('Please provide a GATEWAYURL in your .env to ensure proper code generation');
+    console.warn(
+      "Please provide a GATEWAYURL in your .env to ensure proper code generation"
+    );
   }
 
   app.use(cors(corsConfig));
 
-  const LRPC = new LRPCEngine(application, service, authorize, process.env.SERVICEHOST, Container, socketConfig, isGateway);
+  const LRPC = new LRPCEngine(
+    application,
+    service,
+    authorize,
+    process.env.SERVICEHOST,
+    Container,
+    socketConfig,
+    isGateway
+  );
   LRPC.tId = workerData ? workerData.id : undefined;
   LRPC.processControllers(controllers, app);
   LRPC.processClientControllers(serviceClients);
   LRPC.processQueueRequest();
 
-  app.use("/lrpc", upload.array('files'), LRPC.processRequest);
+  LRPC.processEvents();
+
+  app.use("/lrpc", upload.array("files"), LRPC.processRequest);
 
   app.get("/client", LRPC.fetchScript);
 
   createServiceClient(LRPC);
   createFEClient(LRPC);
+  LRPC.eventManager.generateEvents();
 
-  if(!parentPort){
-    if(socketConfig){
-    const server = LRPC.initSocket(app);
-    server.listen(process.env.PORT, async () => {
-      console.log(`Server/Websocket listening on port ${process.env.PORT}`);
-      await Promise.all(sockcetHandlerPromises);
-    });
+  if (!parentPort) {
+    if (socketConfig) {
+      const server = LRPC.initSocket(app);
+      server.listen(process.env.PORT, async () => {
+        console.log(`Server/Websocket listening on port ${process.env.PORT}`);
+        await Promise.all(sockcetHandlerPromises);
+      });
     } else {
       app.listen(process.env.PORT, () => {
         console.log(`Server listening on port ${process.env.PORT}`);
@@ -744,39 +837,34 @@ const initLRPC = (
 
 const LRPCFunction =
   (controller, request, response, service = false) =>
-    (target, name, descriptor) => {
-      serviceHandlerPromises.push(async () => {
-        // const paramNames = LRPCEngine.getParameterNames(descriptor.value);
+  (target, name, descriptor) => {
+    serviceHandlerPromises.push(async () => {
+      // const paramNames = LRPCEngine.getParameterNames(descriptor.value);
 
-        let methodName = target.constructor.name;
-        const methodKey = `${LRPCEngine.instance.service}.${controller}.${methodName}`;
-        await LRPCEngine.instance.registerCallback(methodKey, methodName);
-        // console.log(methodKey, 'methodKey');
-        const metadataValue = Reflect.getMetadata(
-          "auth",
-          target,
-          "handler"
-        );
+      let methodName = target.constructor.name;
+      const methodKey = `${LRPCEngine.instance.service}.${controller}.${methodName}`;
+      await LRPCEngine.instance.registerCallback(methodKey, methodName);
+      // console.log(methodKey, 'methodKey');
+      const metadataValue = Reflect.getMetadata("auth", target, "handler");
 
-        return {
-          service,
-          methodName,
-          name,
-          request,
-          response,
-          controller,
-          isAuth: metadataValue,
-          isMedia: Reflect.getMetadata("media", target, name),
-          isSocket: Reflect.getMetadata("socket", target, name) ? true : false
-        };
-      });
+      return {
+        service,
+        methodName,
+        name,
+        request,
+        response,
+        controller,
+        isAuth: metadataValue,
+        isMedia: Reflect.getMetadata("media", target, name),
+        isSocket: Reflect.getMetadata("socket", target, name) ? true : false,
+      };
+    });
 
-      // console.log(serviceHandlerPromises, 'setup');
+    // console.log(serviceHandlerPromises, 'setup');
 
-      return descriptor;
-    };
-
-
+    return descriptor;
+  };
+  
 
 module.exports = {
   LRPCFunction,
@@ -797,5 +885,7 @@ module.exports = {
   LRPCObjectProp,
   LRPCSocket,
   LRPCType,
-  initWorkers
+  initWorkers,
+  LRPCEvent,
+  subScribeEvent
 };

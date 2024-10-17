@@ -1,6 +1,7 @@
 import { Request, Response, Express } from "express";
 // import { RabbitMq } from "./rabbitmq";
 import { Redis } from "ioredis";
+import { LRPCEventType } from './logging/event.d.ts';
 
 export interface IEndpoint {
   handler: (data: any) => Promise<any>;
@@ -181,8 +182,11 @@ declare function LRPCMedia (): (target: any, propertyKey: string, descriptor: Pr
 
 declare function LRPCRedirect (url: string): (target: any, propertyKey: string, descriptor: PropertyDescriptor) => void
 
-declare function LRPCCallback (): (target: any, propertyKey: string, descriptor: PropertyDescriptor) => void
+declare function LRPCCallback (target: any, propertyKey: string, descriptor: PropertyDescriptor): void
 
+declare function subScribeEvent (eventType: LRPCEventType): (target: any, propertyKey: string, descriptor: PropertyDescriptor) => void
+
+declare function LRPCEvent (controller: string): (target: any, propertyKey: string, descriptor: PropertyDescriptor) => void
 
 export {
   LRPCEngine,
@@ -204,5 +208,8 @@ export {
   LRPCObjectProp,
   LRPCSocket,
   LRPCType,
-  initWorkers
+  initWorkers,
+  LRPCEvent,
+  subScribeEvent,
+  LRPCEventType
 };

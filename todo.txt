@@ -1,0 +1,8 @@
+
+
+- Work on events and events subscription -- FIXED
+- Work on end to end encryption for service to service communication
+- Provision a system for custom authentication
+- Work on Oauth2 access and expose handlers for customization
+- Integrate pure request body into validation system for callbacks -- FIXED
+- Work on a doc decorator for the API
