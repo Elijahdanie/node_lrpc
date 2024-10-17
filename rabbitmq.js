@@ -75,11 +75,12 @@ class RabbitMq {
         // console.log('done with a queue item');
     }
 
-    sendToQueue = (queue, message, procedure) => {
+    sendToQueue = (queue, message, procedure, isEvent) => {
         const finalMessage = {
             data: message,
             srcPath: this.queue,
             path: procedure,
+            isEvent
         }
         this.channel.sendToQueue(queue, Buffer.from(JSON.stringify(finalMessage)));
         // console.log('Message sent to queue:', message, 'queue:', queue);

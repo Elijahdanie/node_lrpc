@@ -72,30 +72,35 @@ class EventManager {
         // we have eventName-key: service-eventName-className
     }
 
+
     isSubscribed = async (event) => {
-        if(eventHandlers[event]){
+        if(this.eventHandlers[event]){
             return true;
         }
 
         return false;
     }
 
-    invokeEvent = async (event, payload) => {
+    invokeEvent = async (event, payload, isChild) => {
 
-        const eventKey = `${this.LRPC.application}-event-${event}`;
-        const subscribers = await this.LRPC.redis.smembers(eventKey);
+        if(!isChild){
+            const eventKey = `${this.LRPC.application}-event-${event}`;
+            const subscribers = await this.LRPC.redis.smembers(eventKey);
 
-        // for every subscribers we would push the event to their queue
-        for (const subscriber of subscribers) {
-            const [service, event, className, methodName] = subscriber.split('-');
+            console.log('SUBSCRIBERS', subscribers);
+            // for every subscribers we would push the event to their queue
+            for (const subscriber of subscribers) {
+                const [service, event, className, methodName] = subscriber.split('-');
 
-            if(service !== this.LRPC.application) {
-                continue;
+                if(service === this.LRPC.service) {
+                    continue;
+                }
+                
+                const procedure = `${event}`;
+                const serviceKey = `${service}-${this.LRPC.environment}`;
+                const response = await this.LRPC.Queue.sendToQueue(serviceKey, payload, procedure, true);
+
             }
-            
-            const procedure = `${service}.${event}`;
-            const response = await this.LRPC.Queue.sendToQueue(service, payload, procedure);
-
         }
 
 

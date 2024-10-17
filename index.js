@@ -167,8 +167,16 @@ class LRPCEngine {
 
   processQueueRequest = async () => {
     this.Queue.process(async (payload, done) => {
+      console.log("Processing queue", payload);
       try {
-        const { path, data, srcPath, token } = payload;
+        const { path, data, srcPath, token, isEvent } = payload;
+
+        if(isEvent && this.eventManager.isSubscribed(path)) {
+            await this.eventManager.invokeEvent(path, data, true);
+            done();
+            return;
+        }
+        
         // console.log(payload);
         const endpoint = this.handlers[path];
 
@@ -192,9 +200,6 @@ class LRPCEngine {
           // }
         }
 
-        if (EventManager.instance.isSubscribed(path)) {
-          EventManager.instance.invokeEvent(path, data);
-        }
       } catch (error) {
         console.log(error.message);
         done(true);
