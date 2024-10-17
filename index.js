@@ -167,7 +167,6 @@ class LRPCEngine {
 
   processQueueRequest = async () => {
     this.Queue.process(async (payload, done) => {
-      console.log("Processing queue", payload);
       try {
         const { path, data, srcPath, token, isEvent } = payload;
 
