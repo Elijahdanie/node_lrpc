@@ -87,7 +87,7 @@ class EventManager {
             const eventKey = `${this.LRPC.application}-event-${event}`;
             const subscribers = await this.LRPC.redis.smembers(eventKey);
 
-            console.log('SUBSCRIBERS', subscribers);
+            // console.log('SUBSCRIBERS', subscribers);
             // for every subscribers we would push the event to their queue
             for (const subscriber of subscribers) {
                 const [service, event, className, methodName] = subscriber.split('-');
