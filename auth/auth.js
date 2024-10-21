@@ -24,19 +24,21 @@ class AuthService {
         }
     }
 
-    static async verifyCustom(token) {
+    static async verifyCustom(token, secret) {
         let properToken = AuthService.cleanToken(token);
-        let decoded = jwt.verify(properToken, appSecret);
+        let decoded = jwt.verify(properToken, secret ? secret : appSecret);
         return decoded;
     }
 
     static async verify(token, path) {
+
         try {
             const properToken = AuthService.cleanToken(token);
             let decoded = jwt.verify(properToken, appSecret);
             if(decoded.uE){
                 decoded = decoded.uE;
             }
+
             const subScription = decoded.subscription ? decoded.subscription
                                                     : this.compatibility(decoded)
             const permissions = await AuthService.redis.get(subScription);
@@ -67,6 +69,11 @@ class AuthService {
 
     static sign(data, exp) {
         const token = jwt.sign(data, appSecret, { expiresIn: exp ? exp : '365d' });
+        return `Bearer ${token}`;
+    }
+
+    static signCustom(data, secret, exp) {
+        const token = jwt.sign(data, secret ? secret : appSecret, { expiresIn: exp ? exp : '365d' });
         return `Bearer ${token}`;
     }
 

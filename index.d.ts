@@ -129,8 +129,9 @@ declare function initLRPC(
       credentials?: boolean | undefined;
       maxAge?: number | undefined;
     };
+    authorize?: ((token: string, path: string, role: string[]) => Promise<{message: string, status: Status, data: any}>);
+    oauthAuthorize?: (request: Request, path: string, decoded: any) => Promise<{message: string, status: Status}>;
   },
-  authorize: (token: string, path: string, role: string[]) => any,
   controllers?,
   serviceClients?,
   Container?,

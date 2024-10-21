@@ -46,6 +46,7 @@ class LRPCEngine {
   static instance;
   static trackInstance = 0;
   authorize;
+  oauthAuthorize;
   Queue;
   redis;
   isGateway;
@@ -59,6 +60,7 @@ class LRPCEngine {
     application,
     service,
     authorize,
+    oauthAuthorize,
     url,
     Container,
     socketConfig,
@@ -85,6 +87,7 @@ class LRPCEngine {
 
     this.redis = new Redis(process.env.REDIS_URL);
     this.authorize = authorize;
+    this.oauthAuthorize = oauthAuthorize;
     LRPCEngine.instance = this;
     LRPCEngine.trackInstance++;
     this.container = Container;
@@ -300,6 +303,15 @@ class LRPCEngine {
       if (!this.isLocal(path)) {
         const func = this.clientHandlers[path];
         if (func) {
+
+          if(this.isGateway && this.oauthAuthorize){
+            const authResponse = await this.oauthAuthorize(req, path);
+            if (authResponse.status !== "success") {
+              res.status(200).json(authResponse);
+              return;
+          }
+
+        }
           // const newToken = `LRPC ${JSON.stringify(context)} ${req.headers.authorization}`;
           const response = await func.request(data, req.headers.authorization);
           res.status(200).json(response);
@@ -336,12 +348,24 @@ class LRPCEngine {
         //   metadataValue
         // );
 
-        const authResponse = await AuthService.verify(
+        const authResponse = this.authorize 
+          ? await this.authorize(
+          req.headers.authorization,
+          path,
+          metadataValue
+        ) : await AuthService.verify(
           req.headers.authorization,
           path,
           metadataValue
         );
 
+        if(this.isGateway && this.oauthAuthorize){
+          const response = await this.oauthAuthorize(req, path, authResponse.data);
+          if (response.status !== "success") {
+            res.status(200).json(authResponse);
+            return;
+          }
+        }
         // console.log(authResponse, 'AUTH RESPONSE');
 
         if (authResponse.status !== "success") {
@@ -771,7 +795,6 @@ const initWorkers = async (number, __filename) => {
 
 const initLRPC = (
   config,
-  authorize,
   controllers,
   serviceClients,
   Container,
@@ -796,7 +819,8 @@ const initLRPC = (
   const LRPC = new LRPCEngine(
     application,
     service,
-    authorize,
+    config.authorize,
+    config.oauthAuthorize,
     process.env.SERVICEHOST,
     Container,
     socketConfig,
