@@ -304,7 +304,7 @@ class LRPCEngine {
         const func = this.clientHandlers[path];
         if (func) {
 
-          if(this.isGateway && this.oauthAuthorize){
+          if(func.auth && this.isGateway && this.oauthAuthorize){
             const authResponse = await this.oauthAuthorize(req, path);
             if (authResponse.status !== "success") {
               res.status(200).json(authResponse);
