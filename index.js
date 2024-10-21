@@ -303,6 +303,14 @@ class LRPCEngine {
       if (!this.isLocal(path)) {
         const func = this.clientHandlers[path];
         if (func) {
+          
+          if(func.auth && !req.headers.authorization){
+            res.status(200).json({
+              message: "Unauthorized Access",
+              status: "unauthorized",
+            });
+            return;
+          }
 
           if(func.auth && this.isGateway && this.oauthAuthorize){
             const authResponse = await this.oauthAuthorize(req, path);
