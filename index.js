@@ -315,7 +315,10 @@ class LRPCEngine {
           if(func.auth && this.isGateway && this.oauthAuthorize){
             const authResponse = await this.oauthAuthorize(req, path);
             if (authResponse.status !== "success") {
-              res.status(200).json(authResponse);
+              res.status(200).json({
+                message: "Unauthorized Access",
+                status: "unauthorized",
+              });
               return;
           }
 
@@ -378,7 +381,7 @@ class LRPCEngine {
         if(this.isGateway && this.oauthAuthorize){
           const response = await this.oauthAuthorize(req, path, authResponse.data);
           if (response.status !== "success") {
-            res.status(200).json(authResponse);
+            res.status(200).json(response);
             return;
           }
         }
