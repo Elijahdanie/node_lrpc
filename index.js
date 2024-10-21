@@ -356,6 +356,14 @@ class LRPCEngine {
         //   metadataValue
         // );
 
+        if(!req.headers.authorization){
+          res.status(200).json({
+            message: "Unauthorized Access",
+            status: "unauthorized",
+          });
+          return;
+        }
+
         const authResponse = this.authorize 
           ? await this.authorize(
           req.headers.authorization,

@@ -33,6 +33,14 @@ class AuthService {
     static async verify(token, path) {
 
         try {
+
+            if(!token){
+                return {
+                    message: 'Unauthorized',
+                    status: 'unauthorized'
+                };
+            }
+
             const properToken = AuthService.cleanToken(token);
             let decoded = jwt.verify(properToken, appSecret);
             if(decoded.uE){
