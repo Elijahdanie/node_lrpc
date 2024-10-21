@@ -72,6 +72,7 @@ declare class AuthService {
   static verify: (token: string, path: string) => any;
   static verifyCustom: (token: string) => any;
   static sign: (data: any, exp?: string) => string;
+  static signCustom: (data: any, secret: string, exp?: string) => string;
 }
 
 declare class LRPCEngine {
