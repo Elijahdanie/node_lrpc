@@ -431,7 +431,6 @@ class LRPCEngine {
 
       // invoke event
       if(response && response.status === 'success') {
-        console.log('EVENTS');
         this.eventManager.invokeEvent(path, data);
       }
     } catch (error) {
