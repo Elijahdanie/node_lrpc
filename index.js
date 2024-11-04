@@ -431,7 +431,10 @@ class LRPCEngine {
 
       // invoke event
       if(response && response.status === 'success') {
-        this.eventManager.invokeEvent(path, data);
+        this.eventManager.invokeEvent(path, {
+          request: data,
+          response: response.data
+        });
       }
     } catch (error) {
       console.log(error);
@@ -553,7 +556,10 @@ class LRPCEngine {
     if (response) res.status(200).json(response);
     
     if(response && response.status === 'success') {
-      this.eventManager.invokeEvent(path, data);
+      this.eventManager.invokeEvent(path, {
+        request: data,
+        response: response.data
+      });
     }
   };
 
