@@ -6,7 +6,7 @@ const fs = require('fs');
 // save registration to events to redis
 // fetch the subscribers and then invoke the subscribers
 // using the end to end encryption that can bypass the token
-// 
+//
 
 const { default: Container } = require("typedi");
 const { application, service } = require('../../../../lrpc.config');
@@ -30,7 +30,7 @@ class EventManager {
     }
 
     generateEvents = async (redis) => {
-        const redisEventKey = `${application}-events`;
+        const redisEventKey = `${application}-${this.LRPC.environment}-event`;
         const events = await this.LRPC.redis.smembers(redisEventKey);
     
     
@@ -59,7 +59,7 @@ class EventManager {
         // console.log(this.eventHandlers);
 
         const subscriberRedis = `${this.LRPC.service}-${subscriber}`;
-        const eventKey = `${this.LRPC.application}-event-${event}`;
+        const eventKey = `${this.LRPC.application}-${this.LRPC.environment}-event-${event}`;
         const record = await this.LRPC.redis.sadd(eventKey, subscriberRedis);
 
         // console.log(record);
@@ -84,7 +84,7 @@ class EventManager {
     invokeEvent = async (event, payload, isChild) => {
 
         if(!isChild){
-            const eventKey = `${this.LRPC.application}-event-${event}`;
+            const eventKey = `${this.LRPC.application}-${this.LRPC.environment}-event-${event}`;
             const subscribers = await this.LRPC.redis.smembers(eventKey);
 
             // console.log('SUBSCRIBERS', subscribers);

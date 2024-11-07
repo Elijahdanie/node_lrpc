@@ -567,7 +567,7 @@ class LRPCEngine {
 
     // events
     // console.log('Processing Events', Events, Subscribers);
-    const redisKeyEvent = `${this.application}-events`;
+    const redisKeyEvent = `${this.application}-${this.environment}-events`;
 
     await Promise.all(Events.map(async (event)=>{
         LRPCEngine.instance.redis.sadd(redisKeyEvent, event);
