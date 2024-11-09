@@ -1,5 +1,6 @@
 const path = require("path");
 const fs = require("fs");
+const helmet = require("helmet");
 const { RabbitMq } = require("./rabbitmq");
 const { Redis } = require("ioredis");
 const {
@@ -839,6 +840,7 @@ const initLRPC = (
   }
 
   app.use(cors(corsConfig));
+  app.use(helmet());
 
   const LRPC = new LRPCEngine(
     application,
