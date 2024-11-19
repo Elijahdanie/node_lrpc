@@ -841,6 +841,7 @@ const initLRPC = (
 
   app.use(cors(corsConfig));
   app.use(helmet());
+  app.set('trust proxy', true);
 
   const LRPC = new LRPCEngine(
     application,
