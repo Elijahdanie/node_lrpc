@@ -30,7 +30,7 @@ class EventManager {
     }
 
     generateEvents = async (redis) => {
-        const redisEventKey = `${application}-${this.LRPC.environment}-event`;
+        const redisEventKey = `${application}-${this.LRPC.environment}-events`;
         const events = await this.LRPC.redis.smembers(redisEventKey);
     
     
