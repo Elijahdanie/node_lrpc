@@ -79,13 +79,13 @@ const generateServiceCode = (controllerName, className, methodName, request, res
     return `
         ${className}: {
             ${isAuth ? `auth: '${isAuth}',` : ''}
-            request: async (data: ${request.name}, token?: string): Promise<${response.name}> => {
+            request: async (data: ${request.name}, headers: any, token?: string): Promise<${response.name}> => {
 
                 try {
     
                     const procedure = '${LRPC.service}.${controllerName}.${className}';
     
-                    const response = await request(procedure, data, '${process.env.SERVICEHOST}', token);
+                    const response = await request(procedure, data, '${process.env.SERVICEHOST}', headers, token);
     
                     return response.data;
                 } catch (error) {
