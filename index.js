@@ -325,7 +325,7 @@ class LRPCEngine {
 
         }
           // const newToken = `LRPC ${JSON.stringify(context)} ${req.headers.authorization}`;
-          const response = await func.request(data, req.headers, req.headers.authorization);
+          const response = await func.request(data, req.headers);
           res.status(200).json(response);
           return;
         }
