@@ -325,7 +325,17 @@ class LRPCEngine {
 
         }
           // const newToken = `LRPC ${JSON.stringify(context)} ${req.headers.authorization}`;
-          const response = await func.request(data, req.headers);
+          const response = await func.request(data, {
+            Authorization: req.headers.authorization,
+            "X-Forwarded-For": req.headers['x-forwarded-for'] || req.ip,
+            "X-Forwarded-Proto": req.headers['x-forwarded-proto'], // Protocol (http/https)
+            "X-Forwarded-Host": req.headers['x-forwarded-host'] || req.hostname, // Original host header
+            "User-Agent": req.headers['user-agent'], // Client info (browser/app)
+            "Accept-Language": req.headers['accept-language'], // Language preference
+            "Content-Type": req.headers['content-type'], // Original content type
+            "Accept": req.headers['accept'], // Acceptable media types
+            Cookie: req.headers.cookie // Session cookies
+        });
           res.status(200).json(response);
           return;
         }
