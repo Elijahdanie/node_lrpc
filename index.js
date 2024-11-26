@@ -101,7 +101,11 @@ class LRPCEngine {
 
   initSocket = (app) => {
     const server = createServer(app);
-    this.io = new Server(server);
+    this.io = new Server(server, {
+      cors: {
+        origin: "*"
+      }
+    });
     this.io.on("connection", async (socket) => {
       const token = socket.handshake.query.token;
       const path = socket.handshake.query.path;
