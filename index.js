@@ -854,7 +854,18 @@ const initLRPC = (
   }
 
   app.use(cors(corsConfig));
-  app.use(helmet());
+  app.use(
+    helmet.contentSecurityPolicy({
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'", "'unsafe-inline'", "https://js.stripe.com"], // Allow inline scripts and Stripe
+        styleSrc: ["'self'", "'unsafe-inline'"], // Allow inline styles if needed
+        connectSrc: ["'self'", "https://api.stripe.com"], // Allow connections to Stripe's API
+        frameSrc: ["'self'", "https://js.stripe.com"], // Allow iframes from Stripe
+        imgSrc: ["'self'", "data:"], // Allow images and data URIs
+      },
+    })
+  );
   app.set('trust proxy', true);
 
   const LRPC = new LRPCEngine(
