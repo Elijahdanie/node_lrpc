@@ -60,6 +60,38 @@ export const queue = async (service: string, procedure: string, data: any, token
     const response = await LRPCEngine.instance.Queue.sendToQueue(service, data, procedure);
     return response;
 }
+
+
+export const formUpload = async (procedure: string, data: any, files: any[], headers: any, onUploadProgress: (progress: any) => void) => {
+            
+            const url = process.env.MEDIA_URL;
+            if(url){
+                const formData = new FormData();
+                for(const key in data){
+                    // console.log(key, data[key])
+                    formData.append(key, data[key]); 
+                }
+                for(const file of files){
+                    formData.append('files', file);
+                }
+                formData.append('path', procedure);
+                const response = await axios.post(url, formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                        ...headers
+                    },
+                    onUploadProgress
+                });
+                return response;
+            } else {
+                return {
+                    data: {
+                        message: 'Gateway URL not set',
+                        status: 'error'
+                    }
+                }
+            }
+        }
 `
 
     fs.writeFileSync(indexFile, content);
