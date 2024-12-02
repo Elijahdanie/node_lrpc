@@ -64,7 +64,7 @@ export const queue = async (service: string, procedure: string, data: any, token
 
 export const formUpload = async (procedure: string, data: any, files: any[], headers: any, onUploadProgress: (progress: any) => void) => {
             
-            const url = process.env.MEDIA_URL;
+            const url = process.env.MEDIAURL;
             if(url){
                 const formData = new FormData();
                 for(const key in data){
