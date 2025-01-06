@@ -667,7 +667,7 @@ const LRPCPayload =
     let finalScript = "";
     // console.log(script, 'script')
     // replicate the class
-    finalScript = `interface ${constructor.name} {
+    finalScript = `type ${constructor.name} = {
 ${Object.keys(script)
   .map(
     (key) => `\t${key}${script[key].optional ? "?" : ""}: ${script[key].type};`
@@ -678,7 +678,7 @@ ${Object.keys(script)
     // console.log(finalScript);
 
     if (isResponse) {
-      finalScript = `interface ${constructor.name}{\n\tmessage: string\n\tstatus: Status\n\tdata?: {\n`;
+      finalScript = `type ${constructor.name}={\n\tmessage: string\n\tstatus: Status\n\tdata?: {\n`;
       finalScript += `
 ${Object.keys(script)
   .map(

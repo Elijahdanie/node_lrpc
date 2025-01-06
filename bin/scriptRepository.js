@@ -41,9 +41,26 @@ const serviceClients = {
 import axios from 'axios';
 import { LRPCEngine } from '@elijahdanie/lrpc';
 
+let urlCache:{
+    [key: string]: string
+} = {};
+
+export const fetchHost = async (serviceName: string) => {
+    const LRPC = LRPCEngine.instance as any;
+    const result = await LRPC.redis.get(${LRPC.application}-lrpcHost:${serviceName}-host);
+    return result;
+}
+
 export type Status = 'success' | 'error' | 'unauthorized' | 'notFound' | 'restricted' | 'validationError';
 
-export const request = async (procedure: string, data: any, url: string, headers?: any) => {
+export const request = async (procedure: string, data: any, service: string, headers?: any) => {
+
+    let url = urlCache[service];
+    if (!url) {
+        url = await fetchHost(service);
+        urlCache[service] = url;
+    }
+
     const response = await axios.post(url, {
             path: procedure,
             data

@@ -8,6 +8,11 @@ export interface IEndpoint {
   validator: (input: any) => Promise<{ message: string; status: Status }>;
 }
 
+/**
+ * Permission interface
+ * limit: number
+ * resources: string[]
+ */
 export interface IPermission {
   limit: number;
   resources: string[];
@@ -162,13 +167,34 @@ declare function LRPCLimit(
 
 declare function LRPCResource (payloadKey?: string) : (target: any, propertyKey: string, descriptor: PropertyDescriptor) => void
 
-declare function genericListFetch (model: any, data: any, keyQuery: {[key: string]: any}, permissions, misc: {include?:any, select?:any, orderBy?: any} = {}): Promise<{
+/**
+ * 
+ * @param model The prisma model to make use of
+ * @param data The data to be used for fetching list e.g {
+ * page: string, limit: string, search: string
+ * }
+ * @param keyQuery The query to be used for fetching list e.g {
+ * id: string, name: string
+ * }
+ * @param permissions The permissions to be used for fetching, reference IPermission interface
+ * @param misc These are the prisma options e.g {
+ * include: string, select: string, orderBy: string
+ * }
+ * @returns The list of data
+ */
+declare function genericListFetch (model: any, data: any, keyQuery: {[key: string]: any}, permissions: IPermission, misc: {include?:any, select?:any, orderBy?: any} = {}): Promise<{
   data: any;
   total: any;
   page: any;
   totalPages: number;
 }>
 
+/**
+ * 
+ * @param type The type of the array
+ * @param isoptional Is the array optional
+ * @returns void
+ */
 declare function LRPCPropArray(type?: {
   new (): any;
 }, isoptional: boolean = false): (target: any, key: string) => void;
