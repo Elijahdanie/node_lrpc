@@ -47,7 +47,7 @@ let urlCache:{
 
 export const fetchHost = async (serviceName: string) => {
     const LRPC = LRPCEngine.instance as any;
-    const result = await LRPC.redis.get(\`\${LRPC.application}-lrpcHost:\${serviceName}-host\`);
+    const result = await LRPC.redis.get(\`\${LRPC.application}-\${process.env.NODE_ENV}:\${serviceName}-host\`);
     return result;
 }
 

@@ -1,13 +1,10 @@
 const path = require("path");
 const fs = require("fs");
 const helmet = require("helmet");
+
 const { RabbitMq } = require("./rabbitmq");
 const { Redis } = require("ioredis");
-const {
-  genericListFetch,
-  LRPCLimit,
-  LRPCResource,
-} = require("./decorators/auth.js");
+const { genericListFetch, LRPCLimit, LRPCResource } = require("./decorators/auth.js");
 const { LRPCMedia } = require("./decorators/media.js");
 const { LRPCRedirect, LRPCCallback } = require("./decorators/url.js");
 const cors = require("cors");
@@ -18,7 +15,9 @@ const { workerData, parentPort, Worker } = require("worker_threads");
 
 const multer = require("multer");
 const storage = multer.memoryStorage();
-const upload = multer({ storage: storage });
+const upload = multer({
+  storage: storage
+});
 
 require("reflect-metadata");
 
@@ -29,6 +28,7 @@ const {
   createServiceClient,
   createFEClient,
 } = require("./bin/clientGenerator");
+
 const { fetchScriptRemote } = require("./bin/scriptRepository");
 const { secret } = require("../../../lrpc.config.js");
 const { subScribeEvent, LRPCEvent, EventManager, Events, Subscribers } = require("@elijahdanie/lrpc/logging/event.js");
