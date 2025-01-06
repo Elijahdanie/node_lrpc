@@ -147,6 +147,7 @@ const generateServiceCode = (controllerName, className, methodName, request, res
     `
 }
 
+
 const createServiceClient = (LRPC) => {
     const controllerMaps = {};
 
