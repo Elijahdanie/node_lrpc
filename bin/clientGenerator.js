@@ -128,7 +128,7 @@ const generateServiceCode = (controllerName, className, methodName, request, res
                     try {
         
                         const procedure = '${LRPC.service}.${controllerName}.${className}';
-                        const service = '${LRPC.service}-${LRPC.environment}';
+                        const service = \`${LRPC.service}-\${process.env.NODE_ENV}\`;
         
                         const response = queue(service, procedure, data, token);
         
