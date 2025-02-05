@@ -124,11 +124,13 @@ const genericListFetch = async (model, data, keyQuery, permissions, misc = {}) =
     const skip = (data.page - 1) * data.limit;
     const take = data.limit;
 
-    const searchQuery = data.search && !data.search.isArray ? {
+    const searchQuery = data.search ? {
         [data.search.key]: {
-            [!data.search.isArray ? 'contains' : 'has']: data.search.value
+            [!data.search.isArray ? 'contains' : 'equals']: data.search.value
         }
     } : {};
+
+    console.log(searchQuery);
 
     const total = permissions.resources && permissions.resources.length > 0 ?
         await model.count({
