@@ -126,7 +126,7 @@ const genericListFetch = async (model, data, keyQuery, permissions, misc = {}) =
 
     const searchQuery = data.search && !data.search.isArray ? {
         [data.search.key]: {
-            [data.search.isArray ? 'contains' : 'has']: data.search.value
+            [!data.search.isArray ? 'contains' : 'has']: data.search.value
         }
     } : {};
 
