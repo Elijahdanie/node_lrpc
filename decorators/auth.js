@@ -124,9 +124,9 @@ const genericListFetch = async (model, data, keyQuery, permissions, misc = {}) =
     const skip = (data.page - 1) * data.limit;
     const take = data.limit;
 
-    const searchQuery = data.search ? {
+    const searchQuery = data.search && !data.search.isArray ? {
         [data.search.key]: {
-            contains: data.search.value
+            [data.search.isArray ? 'contains' : 'has']: data.search.value
         }
     } : {};
 
