@@ -32,7 +32,7 @@ const getTypeDefinitions = (type, isMedia) => {
 const generateClientCode = (controllerName, className, methodName, request, response, LRPC, isSocket) => {
 
     return `
-        static async ${className}(data: ${getTypeDefinitions(request.name)} | ${request.name}${isSocket ? ", onMessage: (message) => void":""}):Promise<${response.name}> {
+        static async ${className}(data: ${getTypeDefinitions(request.name)} | ${request.name}${isSocket ? ", onMessage: (message: any) => void":""}):Promise<${response.name}> {
 
             try {
 
