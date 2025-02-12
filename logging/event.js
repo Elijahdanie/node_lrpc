@@ -149,8 +149,15 @@ const LRPCEvent = (controller) => (target, propertyKey, descriptor) => {
     Events.push(event);
 }
 
+const createLRPCEvent = (event) => {
+    const eventKey = `'${service}.${event}'`;
+
+    Events.push(eventKey);
+}
+
 module.exports = {
     LRPCEvent,
+    createLRPCEvent,
     subScribeEvent,
     EventManager,
     Subscribers,

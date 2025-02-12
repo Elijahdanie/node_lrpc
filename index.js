@@ -31,7 +31,7 @@ const {
 
 const { fetchScriptRemote } = require("./bin/scriptRepository");
 const { secret } = require("../../../lrpc.config.js");
-const { subScribeEvent, LRPCEvent, EventManager, Events, Subscribers } = require("@elijahdanie/lrpc/logging/event.js");
+const { subScribeEvent, LRPCEvent, EventManager, Events, Subscribers, createLRPCEvent } = require("@elijahdanie/lrpc/logging/event.js");
 
 const sockcetHandlerPromises = [];
 
@@ -178,12 +178,12 @@ class LRPCEngine {
       try {
         const { path, data, srcPath, token, isEvent } = payload;
 
-        if(isEvent && this.eventManager.isSubscribed(path)) {
-            await this.eventManager.invokeEvent(path, data, true);
-            done();
-            return;
+        if (isEvent && this.eventManager.isSubscribed(path)) {
+          await this.eventManager.invokeEvent(path, data, true);
+          done();
+          return;
         }
-        
+
         // console.log(payload);
         const endpoint = this.handlers[path];
 
@@ -308,8 +308,8 @@ class LRPCEngine {
       if (!this.isLocal(path)) {
         const func = this.clientHandlers[path];
         if (func) {
-          
-          if(func.auth && !req.headers.authorization){
+
+          if (func.auth && !req.headers.authorization) {
             res.status(200).json({
               message: "Unauthorized Access",
               status: "unauthorized",
@@ -317,7 +317,7 @@ class LRPCEngine {
             return;
           }
 
-          if(func.auth && this.isGateway && this.oauthAuthorize){
+          if (func.auth && this.isGateway && this.oauthAuthorize) {
             const authResponse = await this.oauthAuthorize(req, path);
             if (authResponse.status !== "success") {
               res.status(200).json({
@@ -325,9 +325,9 @@ class LRPCEngine {
                 status: "unauthorized",
               });
               return;
-          }
+            }
 
-        }
+          }
           // const newToken = `LRPC ${JSON.stringify(context)} ${req.headers.authorization}`;
           const response = await func.request(data, {
             Authorization: req.headers.authorization,
@@ -339,7 +339,7 @@ class LRPCEngine {
             "Content-Type": req.headers['content-type'], // Original content type
             "Accept": req.headers['accept'], // Acceptable media types
             Cookie: req.headers.cookie // Session cookies
-        });
+          });
           res.status(200).json(response);
           return;
         }
@@ -374,7 +374,7 @@ class LRPCEngine {
         //   metadataValue
         // );
 
-        if(!req.headers.authorization){
+        if (!req.headers.authorization) {
           res.status(200).json({
             message: "Unauthorized Access",
             status: "unauthorized",
@@ -382,18 +382,18 @@ class LRPCEngine {
           return;
         }
 
-        const authResponse = this.authorize 
+        const authResponse = this.authorize
           ? await this.authorize(
-          req.headers.authorization,
-          path,
-          metadataValue
-        ) : await AuthService.verify(
-          req.headers.authorization,
-          path,
-          metadataValue
-        );
+            req.headers.authorization,
+            path,
+            metadataValue
+          ) : await AuthService.verify(
+            req.headers.authorization,
+            path,
+            metadataValue
+          );
 
-        if(this.isGateway && this.oauthAuthorize){
+        if (this.isGateway && this.oauthAuthorize) {
           const response = await this.oauthAuthorize(req, path, authResponse.data);
           if (response.status !== "success") {
             res.status(200).json(response);
@@ -445,7 +445,7 @@ class LRPCEngine {
       if (response) res.status(200).json(response);
 
       // invoke event
-      if(response && response.status === 'success') {
+      if (response && response.status === 'success') {
         this.eventManager.invokeEvent(path, {
           request: data,
           response: response.data
@@ -569,8 +569,8 @@ class LRPCEngine {
     });
 
     if (response) res.status(200).json(response);
-    
-    if(response && response.status === 'success') {
+
+    if (response && response.status === 'success') {
       this.eventManager.invokeEvent(path, {
         request: data,
         response: response.data
@@ -584,12 +584,12 @@ class LRPCEngine {
     // console.log('Processing Events', Events, Subscribers);
     const redisKeyEvent = `${this.application}-${this.environment}-events`;
 
-    await Promise.all(Events.map(async (event)=>{
-        LRPCEngine.instance.redis.sadd(redisKeyEvent, event);
+    await Promise.all(Events.map(async (event) => {
+      LRPCEngine.instance.redis.sadd(redisKeyEvent, event);
     }))
 
     //subscribers
-    await Promise.all(Subscribers.map(async (subscriber)=>{
+    await Promise.all(Subscribers.map(async (subscriber) => {
       this.eventManager.registerEvent(`${subscriber}`);
     }));
   }
@@ -608,9 +608,8 @@ class LRPCEngine {
           );
           // console.log(fetchMetaKeyforCallback, 'META');
           if (fetchMetaKeyforCallback) {
-            const path = `/${controller.replace("Controller", "")}/${
-              endpoint.name
-            }`;
+            const path = `/${controller.replace("Controller", "")}/${endpoint.name
+              }`;
             app.use(path, this.processCallbacks);
           }
           LRPCEngine.instance.container.set(endpoint.name, new endpoint());
@@ -637,6 +636,10 @@ class LRPCEngine {
   async registerCallback(methodKey, className) {
     this.handlers[methodKey] = className;
   }
+
+  async invokeEvent (path, data) {
+    this.eventManager.invokeEvent(`${this.service}.${path}`, data);
+  }
 }
 
 const LRPCAuth = (roles) => (target, name, descriptor) => {
@@ -645,55 +648,55 @@ const LRPCAuth = (roles) => (target, name, descriptor) => {
 
 const LRPCPayload =
   (path, isResponse = false) =>
-  (constructor) => {
-    // console.log(constructor.name);
-    let script = propAccumulator[constructor.name];
+    (constructor) => {
+      // console.log(constructor.name);
+      let script = propAccumulator[constructor.name];
 
-    if (!script) {
-      script = {};
-    }
+      if (!script) {
+        script = {};
+      }
 
-    const derivedClass = Object.getPrototypeOf(constructor);
+      const derivedClass = Object.getPrototypeOf(constructor);
 
-    if (derivedClass.name) {
-      script = {
-        ...script,
-        ...propAccumulator[derivedClass.name],
-      };
+      if (derivedClass.name) {
+        script = {
+          ...script,
+          ...propAccumulator[derivedClass.name],
+        };
 
-      propAccumulator[constructor.name] = script;
-    }
+        propAccumulator[constructor.name] = script;
+      }
 
-    let finalScript = "";
-    // console.log(script, 'script')
-    // replicate the class
-    finalScript = `type ${constructor.name} = {
+      let finalScript = "";
+      // console.log(script, 'script')
+      // replicate the class
+      finalScript = `type ${constructor.name} = {
 ${Object.keys(script)
-  .map(
-    (key) => `\t${key}${script[key].optional ? "?" : ""}: ${script[key].type};`
-  )
-  .join("\n")}
+          .map(
+            (key) => `\t${key}${script[key].optional ? "?" : ""}: ${script[key].type};`
+          )
+          .join("\n")}
 }`;
 
-    // console.log(finalScript);
+      // console.log(finalScript);
 
-    if (isResponse) {
-      finalScript = `type ${constructor.name}={\n\tmessage: string\n\tstatus: Status\n\tdata?: {\n`;
-      finalScript += `
+      if (isResponse) {
+        finalScript = `type ${constructor.name}={\n\tmessage: string\n\tstatus: Status\n\tdata?: {\n`;
+        finalScript += `
 ${Object.keys(script)
-  .map(
-    (key) =>
-      `\t\t${key}${script[key].optional ? "?" : ""}: ${script[key].type};`
-  )
-  .join("\n")}\n\t}\n}
+            .map(
+              (key) =>
+                `\t\t${key}${script[key].optional ? "?" : ""}: ${script[key].type};`
+            )
+            .join("\n")}\n\t}\n}
   `;
-    }
+      }
 
-    if (!typeLibrary[path]) {
-      typeLibrary[path] = {};
-    }
-    typeLibrary[path][constructor.name] = finalScript;
-  };
+      if (!typeLibrary[path]) {
+        typeLibrary[path] = {};
+      }
+      typeLibrary[path][constructor.name] = finalScript;
+    };
 
 const LRPCPropOp = (target, key) => {
   const propertyType = Reflect.getMetadata("design:type", target, key);
@@ -917,34 +920,34 @@ const initLRPC = (
 
 const LRPCFunction =
   (controller, request, response, service = false) =>
-  (target, name, descriptor) => {
-    serviceHandlerPromises.push(async () => {
-      // const paramNames = LRPCEngine.getParameterNames(descriptor.value);
+    (target, name, descriptor) => {
+      serviceHandlerPromises.push(async () => {
+        // const paramNames = LRPCEngine.getParameterNames(descriptor.value);
 
-      let methodName = target.constructor.name;
-      const methodKey = `${LRPCEngine.instance.service}.${controller}.${methodName}`;
-      await LRPCEngine.instance.registerCallback(methodKey, methodName);
-      // console.log(methodKey, 'methodKey');
-      const metadataValue = Reflect.getMetadata("auth", target, "handler");
+        let methodName = target.constructor.name;
+        const methodKey = `${LRPCEngine.instance.service}.${controller}.${methodName}`;
+        await LRPCEngine.instance.registerCallback(methodKey, methodName);
+        // console.log(methodKey, 'methodKey');
+        const metadataValue = Reflect.getMetadata("auth", target, "handler");
 
-      return {
-        service,
-        methodName,
-        name,
-        request,
-        response,
-        controller,
-        isAuth: metadataValue,
-        isMedia: Reflect.getMetadata("media", target, name),
-        isSocket: Reflect.getMetadata("socket", target, name) ? true : false,
-      };
-    });
+        return {
+          service,
+          methodName,
+          name,
+          request,
+          response,
+          controller,
+          isAuth: metadataValue,
+          isMedia: Reflect.getMetadata("media", target, name),
+          isSocket: Reflect.getMetadata("socket", target, name) ? true : false,
+        };
+      });
 
-    // console.log(serviceHandlerPromises, 'setup');
+      // console.log(serviceHandlerPromises, 'setup');
 
-    return descriptor;
-  };
-  
+      return descriptor;
+    };
+
 
 module.exports = {
   LRPCFunction,
@@ -966,6 +969,7 @@ module.exports = {
   LRPCSocket,
   LRPCType,
   initWorkers,
+  createLRPCEvent,
   LRPCEvent,
   subScribeEvent
 };

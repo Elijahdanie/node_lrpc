@@ -108,6 +108,7 @@ declare class LRPCEngine {
   disconnectSocket (id: string ): void
   static getParameterNames(func: Function): string[];
   registerCallback: (methodKey: string, className: string) => Promise<void>;
+  invokeEvent: (path, data) => Promise<void>
 }
 
 declare function LRPCAuth(
@@ -216,6 +217,8 @@ declare function subScribeEvent (eventType: LRPCEventType): (target: any, proper
 
 declare function LRPCEvent (controller: string): (target: any, propertyKey: string, descriptor: PropertyDescriptor) => void
 
+declare function createLRPCEvent (event): Promise<void>
+
 export {
   LRPCEngine,
   AuthService,
@@ -239,5 +242,6 @@ export {
   initWorkers,
   LRPCEvent,
   subScribeEvent,
+  createLRPCEvent,
   LRPCEventType
 };
