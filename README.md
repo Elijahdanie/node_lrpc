@@ -45,7 +45,7 @@ npx lrpc init
 ```
 
 ```typescript
-import { initLRPC, LRPCEngine } from "lrpc-framework";
+import { initLRPC, LRPCEngine } from "node_lrpc";
 import express from "express";
 
 const app = express();
@@ -79,8 +79,8 @@ Endpoints in LRPC are defined using decorators and typed request-response models
 
 ### Example Endpoint Definition
 ```typescript
-import { LRPCAuth, LRPCFunction, LRPCPayload, LRPCProp, LRPCPropArray } from "@elijahdanie/lrpc";
-import { BaseResponse, HandlerConfig, LRPCRequest, Status, IEndpoint } from "@elijahdanie/lrpc";
+import { LRPCAuth, LRPCFunction, LRPCPayload, LRPCProp, LRPCPropArray } from "node_lrpc";
+import { BaseResponse, HandlerConfig, LRPCRequest, Status, IEndpoint } from "node_lrpc";
 import engineRepository from "../engineRepository";
 import Container, { Service } from "typedi";
 
