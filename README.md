@@ -216,5 +216,5 @@ Feel free to contribute by submitting pull requests or opening issues.
 MIT License
 
 ## Contact
-For questions, issues, or contributions, contact us at support@lrpc-framework.com.
+For questions, issues, or contributions, contact us at thachromatone@gmail.com
 
