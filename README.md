@@ -45,18 +45,35 @@ npx lrpc init
 ```
 
 ```typescript
-import { initLRPC, LRPCEngine } from "node_lrpc";
-import express from "express";
+import express from 'express';
+import { initLRPC, initWorkers } from 'node_lrpc';
+import bodyParser from 'body-parser';
+import { PrismaClient } from '@prisma/client';
+import { controllers, serviceClients } from './lrpc/registery';
+import Container from 'typedi';
 
+// console.log('Starting server');
+
+export const prisma = new PrismaClient();
 const app = express();
+app.use(bodyParser.json({limit: '50mb'}));
+app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
 
-const lrpc = initLRPC({
-  application: "MyApp",
-  service: "UserService",
-  app,
+app.get('/', (req, res) => {
+  res.send(`Hello World from ${process.env.REPLICAS}`);
 });
 
-app.listen(3000, () => console.log("LRPC service running on port 3000"));
+
+export const LRPC = initLRPC({
+  application: 'smartbloks',
+  service: 'ai',
+  app
+},
+controllers,
+serviceClients,
+Container, {} as any);
+// initWorkers(3, __filename);
+
 ```
 
 ## Configuration
