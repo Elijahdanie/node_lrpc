@@ -202,11 +202,11 @@ npx lrpc refresh
 ```
 Updates the `./src/lrpc/registry` file, which contains all the registered controllers.
 
-### Run Unit Tests
+### Booststrap Unit Tests
 ```sh
 npx lrpc unittest <controller-name>
 ```
-Runs unit tests for the specified controller.
+Booststraps unit tests for the specified controller.
 
 ## Authentication
 LRPC provides built-in authentication via `AuthService`:
@@ -221,6 +221,132 @@ const lrpc = new LRPCEngine();
 lrpc.redis.set("key", "value");
 lrpc.Queue.sendToQueue("taskQueue", { task: "processData" }, "procedureName");
 ```
+
+## Decorators
+
+### `@LRPCAuth`
+This decorator is used to add authorization to an endpoint by specifying the roles that are allowed to access it.
+
+#### Usage:
+```typescript
+class ExampleService {
+  @LRPCAuth(['admin', 'user'])
+  async someProtectedMethod(data: any) {
+    // Implementation
+  }
+}
+```
+
+#### Parameters:
+- `roles?: string[]` - An optional array of roles that are authorized to access the method.
+
+---
+
+### `@LRPCPayload`
+This decorator marks a class as part of the type definition in the payload or response of an endpoint.
+
+#### Usage:
+```typescript
+@LRPCPayload('/user/create', true)
+class CreateUserResponse {
+  id: string;
+  name: string;
+}
+```
+
+#### Parameters:
+- `path: string` - The path of the endpoint.
+- `isResponse?: boolean` - Whether the class represents a response payload.
+
+---
+
+### `@LRPCPropOp`
+Marks a field in an `LRPCPayload` as optional.
+
+#### Usage:
+```typescript
+class User {
+  @LRPCPropOp
+  middleName?: string;
+}
+```
+
+#### Parameters:
+- `target: any` - The class prototype.
+- `key: string` - The field name.
+
+---
+
+### `@LRPCSocket`
+Marks an endpoint as a socket-based endpoint.
+
+#### Usage:
+```typescript
+class ChatService {
+  @LRPCSocket
+  async handleMessage(data: any) {
+    // Handle socket message
+  }
+}
+```
+
+#### Parameters:
+- `target: any` - The class prototype.
+- `key: string` - The method name.
+
+---
+
+### `@LRPCProp`
+Marks a field in an `LRPCPayload` as required.
+
+#### Usage:
+```typescript
+class User {
+  @LRPCProp
+  firstName: string;
+}
+```
+
+#### Parameters:
+- `target: any` - The class prototype.
+- `key: string` - The field name.
+
+---
+
+### `@LRPCObjectProp`
+Decorates a field with object-type definitions.
+
+#### Usage:
+```typescript
+class User {
+  @LRPCObjectProp({ name: 'string' }, false)
+  metadata: { name: string };
+}
+```
+
+#### Parameters:
+- `value: any` - The object type definition.
+- `optional: boolean` - Whether the property is optional.
+
+---
+
+### `@LRPCType`
+Decorates a field with a custom type definition such as enums or unions.
+
+#### Usage:
+```typescript
+class Task {
+  @LRPCType(`'start' | 'stop' | 'pause' | 'resume'`, false)
+  status: 'start' | 'stop' | 'pause' | 'resume';
+}
+```
+
+#### Parameters:
+- `value: any` - The custom type definition.
+- `optional: boolean` - Whether the property is optional.
+
+
+
 
 ## Benchmarks
 LRPC is optimized for low-latency communication. Benchmarks coming soon.
