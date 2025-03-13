@@ -14,7 +14,7 @@ LRPC (Lightweight Remote Procedure Call) is a high-performance framework for han
 
 ## Installation
 ```sh
-npm install node_lrpc
+npx create-node-lrpc create <application> <service>
 ```
 
 ## Folder Structure
