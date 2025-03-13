@@ -19,7 +19,8 @@ npx create-node-lrpc create <application> <service>
 
 ## Folder Structure
 ```
-/ 
+
+/
 │── lrpc.config.js
 │── src
 │   ├── controllers
@@ -37,7 +38,22 @@ npx create-node-lrpc create <application> <service>
 │   │   │   ├── api.ts
 │   │   │   ├── index.ts
 │   │   │   ├── utils.ts
+│   │   ├── registery.ts
+│   ├── index.ts
+│   ├── tests
+│   │   ├── index.test.ts
+│   │   ├── sampleController.ts
+│   ├── utils
+│   │   ├── index.ts
+│   ├── .dockerignore
+│   ├── .env
+│   ├── Dockerfile
+│   ├── jest.config.js
+│   ├── lrpc.config.js
+│   ├── package.json
+│   └── tsconfig.json
 ```
+
 
 ## Quick Start
 ```sh
