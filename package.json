@@ -1,18 +1,21 @@
 {
-  "name": "node_lrpc",
-  "version": "0.0.4",
+  "name": "@elijahdanie/lrpc",
+  "version": "0.1.40",
   "type": "commonjs",
   "description": "This package helps services communicate with each other using redis",
   "main": "index.js",
   "bin": {
     "lrpc": "./bin/cli.js"
   },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
   "keywords": [],
   "author": "Elijah Daniel",
   "license": "ISC",
   "dependencies": {
-    "amqplib": "^0.10.5",
-    "commander": "2.20.3",
+    "amqplib": "^0.10.3",
+    "commander": "9.0.0",
     "cors": "^2.8.5",
     "helmet": "^8.0.0",
     "ioredis": "^5.3.2",
@@ -20,10 +23,14 @@
     "multer": "^1.4.5-lts.1",
     "prom-client": "^15.1.2",
     "reflect-metadata": "^0.2.2",
-    "socket.io": "^4.8.1",
+    "socket.io": "^4.7.5",
     "typedi": "^0.10.0"
   },
-  "homepage": "https://github.com/Elijahdanie/node_lrpc#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Elijahdanie/mrn-lrpc.git"
+  },
+  "homepage": "https://github.com/Elijahdanie/mrn-lrpc#readme",
   "devDependencies": {
     "@types/express": "^4.17.21",
     "typedoc": "^0.27.5",

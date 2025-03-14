@@ -9,7 +9,7 @@ const fs = require('fs');
 //
 
 const { default: Container } = require("typedi");
-const { application, service } = require('../../../lrpc.config');
+const { application, service } = require('../../../../lrpc.config');
 
 const Subscribers = [];
 
