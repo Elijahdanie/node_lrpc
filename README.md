@@ -247,7 +247,7 @@ This decorator marks a class as part of the type definition in the payload or re
 
 #### Usage:
 ```typescript
-@LRPCPayload('/user/create', true)
+@LRPCPayload('<controller>', true)
 class CreateUserResponse {
   id: string;
   name: string;

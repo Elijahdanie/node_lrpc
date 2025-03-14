@@ -1,5 +1,5 @@
 
-const { appSecret } = require('../../../../lrpc.config');
+const { appSecret } = require('../../../lrpc.config');
 const jwt = require('jsonwebtoken');
 
 
