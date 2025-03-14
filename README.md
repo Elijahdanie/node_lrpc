@@ -230,7 +230,8 @@ This decorator is used to add authorization to an endpoint by specifying the rol
 #### Usage:
 ```typescript
 class ExampleService {
-  @LRPCAuth(['admin', 'user'])
+  @LRPCAuth(['admin'])
+  @LRPCFunction(controller, sampleRequest, sampleResponse)
   async someProtectedMethod(data: any) {
     // Implementation
   }
@@ -243,7 +244,7 @@ class ExampleService {
 ---
 
 ### `@LRPCPayload`
-This decorator marks a class as part of the type definition in the payload or response of an endpoint.
+This decorator marks a class as part of the type definition in the request payload or response of an endpoint.
 
 #### Usage:
 ```typescript
@@ -282,8 +283,11 @@ Marks an endpoint as a socket-based endpoint.
 
 #### Usage:
 ```typescript
+@Service()
 class ChatService {
+
   @LRPCSocket
+  @LRPCFunction(controller, sampleRequest, sampleResponse)
   async handleMessage(data: any) {
     // Handle socket message
   }
@@ -331,7 +335,7 @@ class User {
 ---
 
 ### `@LRPCType`
-Decorates a field with a custom type definition such as enums or unions.
+Decorates a field with a custom type definition such as enums or union type.
 
 #### Usage:
 ```typescript
@@ -359,4 +363,6 @@ MIT License
 
 ## Contact
 For questions, issues, or contributions, contact us at thachromatone@gmail.com
+
+### For More Information on this visit [https://quadinet.github.io/lrpc](https://quadinet.github.io/lrpc)
 
