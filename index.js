@@ -31,7 +31,7 @@ const {
 
 const { fetchScriptRemote } = require("./bin/scriptRepository");
 const { secret } = require('../../../lrpc.config.js');
-const { subScribeEvent, LRPCEvent, EventManager, Events, Subscribers, createLRPCEvent } = require("@elijahdanie/lrpc/logging/event.js");
+const { subScribeEvent, LRPCEvent, EventManager, Events, Subscribers, createLRPCEvent } = require('./logging/event.js');
 
 const sockcetHandlerPromises = [];
 
