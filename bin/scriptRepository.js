@@ -39,7 +39,7 @@ const serviceClients = {
 
     const utils = `
 import axios from 'axios';
-import { LRPCEngine } from 'node_lrpc)';
+import { LRPCEngine } from 'node_lrpc';
 
 let urlCache:{
     [key: string]: string

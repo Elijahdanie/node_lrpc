@@ -1,4 +1,5 @@
 const fs = require('fs');
+const { service } = require('../../../lrpc.config');
 
 
 const createController = (controller) => {
@@ -209,7 +210,7 @@ const createUnitTests = (controller)=>{
     console.log(__dirname);
 const testContent = `
 // modify import to specify the service
-import { ${controller} } from '../lrpc/clientsFE/service;
+import { ${controller} } from '../lrpc/clientsFE/${service}';
 
 export const ${controller}Test = () => {
     ${endpoints.map(endpoint=>{
