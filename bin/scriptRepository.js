@@ -138,16 +138,6 @@ export default serviceClients;
         fileContent = updateServiceClients(fileContent, service);
     }));
 
-//     const content = `
-//     ${allServices.map(service => `
-// import ${service} from "./${service}";`).join('\n')}
-// const serviceClients = {
-//     ${allServices.map(service => `${service}`).join(',\n')}
-// }
-
-//  export default serviceClients;
-// `;
-
 return fileContent;
 }
 
