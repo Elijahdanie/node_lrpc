@@ -27,15 +27,7 @@ const fetchScript = async (environment) => {
     }));
     const indexFile = './src/lrpc/serviceClients/index.ts';
     const utilsFile = './src/lrpc/serviceClients/utils.ts'
-    const content = `
-    ${allServices.map(service => `
-import ${service} from "./${service}";`).join('\n')}
-const serviceClients = {
-    ${allServices.map(service => `${service}`).join(',\n')}
-}
-
- export default serviceClients;
-`;
+    const content = await resolveServiceIndexFile(indexFile, allServices);
 
     const utils = `
 import axios from 'axios';
@@ -114,6 +106,58 @@ export const formUpload = async (procedure: string, data: any, files: any[], hea
     fs.writeFileSync(indexFile, content);
     fs.writeFileSync(utilsFile, utils);
     redis.disconnect();
+}
+
+
+const resolveServiceIndexFile = async (indexFile, allServices) => {
+
+    const exists = fs.existsSync(indexFile);
+    let fileContent = null;
+    if(!exists){
+        fileContent = `
+const serviceClients = {
+    
+}
+
+export default serviceClients;
+`
+    } else {
+        fileContent = fs.readFileSync(indexFile, 'utf-8');
+    }
+
+
+    await Promise.all(allServices.map(service => {
+        fileContent = updateServiceClients(fileContent, service);
+    }));
+
+return fileContent;
+}
+
+const updateServiceClients = (data, newImportName) => {
+
+    // check if it exist in the data then append, else leave it alone
+    const importStatement = `import ${newImportName} from "./${newImportName}";`;
+
+    const checkContains = data.includes(importStatement);
+    if(checkContains){
+        return data;
+    }
+        const importRegex = new RegExp(`import\s+${newImportName}\s+from\s+"\.\/${newImportName}";`);
+        
+        // Add import statement if not already present
+        let updatedData = importRegex.test(data) ? data : `${importStatement}\n${data}`;
+        
+        // Update serviceClients object
+        const serviceClientsRegex = /const serviceClients\s*=\s*{([^}]*)}/;
+        updatedData = updatedData.replace(serviceClientsRegex, (match, content) => {
+            if (!content.includes(newImportName)) {
+                let trimeC = content.trim();
+                return `const serviceClients = {${trimeC ? trimeC + ',' : ''} ${newImportName}}`;
+            }
+            return match;
+        });
+
+        return updatedData;
 }
 
 const fetchScriptRemote = async (environment, LRPC, resource) => {
