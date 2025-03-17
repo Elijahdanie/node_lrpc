@@ -27,7 +27,7 @@ const createController = (controller, endpointsList) => {
         fs.mkdirSync(endpointsPath);
     }
 
-
+    console.log(endpointsList, 'ENDPOINTS');
 
     const endpoints = endpointsList.length === 0 ? [`${controller}Create`, `${controller}Update`, `${controller}Fetch`, `${controller}Delete`]
     : endpointsList

@@ -5,6 +5,9 @@ const {createController, createEndpoint, generateRegistry, createUnitTests} = re
 const { fetchScript } = require('./scriptRepository');
 const { exit } = require('process');
 const fs = require('fs');
+const path = require('path');
+const defaultInquirer = require('inquirer');
+const inquirer = defaultInquirer.default;
 
 const program = new commander.Command();
 
@@ -17,7 +20,7 @@ program.command('help')
     });
 
 program
-    .command('create <controller>')
+    .command('create')
     .description('Create a controller')
     .action(async () => {
         // if(process.argv[3] === 'lrpc'){
@@ -69,31 +72,73 @@ program
 
         createController(controllerName, endpoints);
 
-        createController(process.argv[3]);
+        // createController(process.argv[3]);
         console.log('Created Controller');
         exit();
     });
 
 program
-    .command('endpoint <controller> <endpoint>')
+    .command('endpoint')
     .description('Create an endpoint')
-    .action(() => {
-        // push the latest microservice configuration to the server
-        const controller = process.argv[3];
-        const endpoint = process.argv[4];
-    const controllerPath = `src/controllers/${controller}`;
-    if(!fs.existsSync(controllerPath)){
-        console.log('Controller does not exist');
-    } else {
-        if(!fs.existsSync(`${controllerPath}/endpoints`)){
-            fs.mkdirSync(`${controllerPath}/endpoints`);
+    .action(async () => {
+
+        const controllersPath = './src/controllers';
+
+        // Check if controllers directory exists
+        if (!fs.existsSync(controllersPath)) {
+            console.log('⚠️ No controllers found. Please create a controller first.');
+            return;
         }
-        const endpointPath = `${controllerPath}/endpoints/${endpoint}.ts`;
+
+        // Get a list of all controllers
+        const controllers = fs.readdirSync(controllersPath).filter((dir) => 
+            fs.statSync(path.join(controllersPath, dir)).isDirectory()
+        );
+
+        if (controllers.length === 0) {
+            console.log('⚠️ No controllers available. Please create a controller first.');
+            return;
+        }
+
+        // Step 1: Let the user choose a controller
+        const { controller } = await inquirer.prompt([
+            {
+                type: 'list',
+                name: 'controller',
+                message: 'Select a controller:',
+                choices: controllers,
+            },
+        ]);
+
+        // Step 2: Prompt for endpoint name
+        const { endpoint } = await inquirer.prompt([
+            {
+                type: 'input',
+                name: 'endpoint',
+                message: 'Enter endpoint name:',
+                validate: (input) => (input.trim() ? true : 'Endpoint name cannot be empty!'),
+            },
+        ]);
+
+        // Step 3: Create endpoint directory if it doesn't exist
+        const controllerPath = path.join(controllersPath, controller);
+        const endpointsDir = path.join(controllerPath, 'endpoints');
+
+        if (!fs.existsSync(endpointsDir)) {
+            fs.mkdirSync(endpointsDir);
+        }
+
+        // Step 4: Create the endpoint file
+        const endpointPath = path.join(endpointsDir, `${endpoint}.ts`);
+        if (fs.existsSync(endpointPath)) {
+            console.log('⚠️ Endpoint already exists!');
+            return;
+        }
+
         const endpointContent = createEndpoint(controller, endpoint);
         fs.writeFileSync(endpointPath, endpointContent);
-        console.log('created endpoint');
-        exit();
-    }
+
+        console.log(`✅ Created endpoint: ${controller}/endpoints/${endpoint}.ts`);
     });
 
 program.command('init')
