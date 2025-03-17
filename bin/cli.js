@@ -142,24 +142,69 @@ program
     });
 
 program.command('init')
-    .description('Show help')
+    .description('Initialize LRPC configuration')
     .action(async () => {
-        const config = `
-module.exports = {
-    application: default,
-    service: 'my-service',
-    appSecret: 'YOUR JWT',
-    secret: 'mysecret',
-    redisUrl: 'redis://localhost:6379',
-}
-`
-        if(!fs.existsSync('./lrpc.config.js')){
-            fs.writeFileSync('./lrpc.config.js', config);
-            console.log('Created LRPC config file');
-        } else {
-            console.log('Config file already exists');
+        const configPath = './lrpc.config.js';
+
+        // Check if config file exists
+        if (fs.existsSync(configPath)) {
+            const { overwrite } = await inquirer.prompt([
+                {
+                    type: 'confirm',
+                    name: 'overwrite',
+                    message: '⚠️ Config file already exists. Do you want to overwrite it?',
+                    default: false,
+                }
+            ]);
+
+            if (!overwrite) {
+                console.log('🚫 Configuration unchanged. Exiting.');
+                return;
+            }
         }
-        exit();
+
+        console.log('\n👉 Setting up LRPC configuration...\n');
+
+        // Step 1: Collect configuration details
+        const answers = await inquirer.prompt([
+            {
+                type: 'input',
+                name: 'application',
+                message: 'Enter the microservice application name:',
+                default: 'default',
+            },
+            {
+                type: 'input',
+                name: 'service',
+                message: 'Enter this service name:',
+                default: 'my-service',
+            },
+            {
+                type: 'input',
+                name: 'secret',
+                message: 'Enter client encryption secret:',
+                default: 'mysecret',
+            },
+        ]);
+
+        // Step 2: Generate config file content
+        const configContent = `
+// Do not edit directly, Run "npx lrpc init" instead
+const { config } = require('dotenv');
+
+config();
+module.exports = {
+    application: '${answers.application}',
+    service: '${answers.service}',
+    appSecret: 'process.env.JWT_SECRET',
+    secret: '${answers.secret}',
+    redisUrl: 'process.env.REDIS_URL',
+};
+        `.trim();
+
+        // Step 3: Write the config file
+        fs.writeFileSync(configPath, configContent);
+        console.log('✅ Created LRPC config file: lrpc.config.js');
     });
 
 program

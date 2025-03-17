@@ -30,7 +30,7 @@ const {
 } = require("./bin/clientGenerator");
 
 const { fetchScriptRemote } = require("./bin/scriptRepository");
-const { secret } = require('../../lrpc.config.js');
+const { secret, application, service } = require('../../lrpc.config.js');
 const { subScribeEvent, LRPCEvent, EventManager, Events, Subscribers, createLRPCEvent } = require('./logging/event.js');
 
 const sockcetHandlerPromises = [];
@@ -58,8 +58,6 @@ class LRPCEngine {
   eventManager;
 
   constructor(
-    application,
-    service,
     authorize,
     oauthAuthorize,
     url,
@@ -842,7 +840,7 @@ const initLRPC = (
   Container,
   socketConfig
 ) => {
-  const { service, app, isGateway, corsConfig, application } = config;
+  const { app, isGateway, corsConfig } = config;
 
   if (!process.env.SERVICEHOST) {
     console.warn(
@@ -872,8 +870,6 @@ const initLRPC = (
   app.set('trust proxy', true);
 
   const LRPC = new LRPCEngine(
-    application,
-    service,
     config.authorize,
     config.oauthAuthorize,
     process.env.SERVICEHOST,

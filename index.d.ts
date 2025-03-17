@@ -366,16 +366,6 @@ declare function initLRPC(
    */
   config: {
     /**
-     * The application name
-     */
-    application: string;
-
-    /**
-     * The service name
-     */
-    service: string;
-
-    /**
      * The express app
      */
     app: Express;
