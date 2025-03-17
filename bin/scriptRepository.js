@@ -28,15 +28,6 @@ const fetchScript = async (environment) => {
     const indexFile = './src/lrpc/serviceClients/index.ts';
     const utilsFile = './src/lrpc/serviceClients/utils.ts'
     const content = await resolveServiceIndexFile(indexFile, allServices);
-//     const content = `
-//     ${allServices.map(service => `
-// import ${service} from "./${service}";`).join('\n')}
-// const serviceClients = {
-//     ${allServices.map(service => `${service}`).join(',\n')}
-// }
-
-//  export default serviceClients;
-// `;
 
     const utils = `
 import axios from 'axios';

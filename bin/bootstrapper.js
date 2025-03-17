@@ -2,7 +2,7 @@ const fs = require('fs');
 const { service } = require('../../../lrpc.config');
 
 
-const createController = (controller) => {
+const createController = (controller, endpointsList) => {
     const controllerFolder = `src/controllers`;
 
     if(!fs.existsSync('./src')){
@@ -27,7 +27,10 @@ const createController = (controller) => {
         fs.mkdirSync(endpointsPath);
     }
 
-    const endpoints = [`${controller}Create`, `${controller}Update`, `${controller}Fetch`, `${controller}Delete`];
+
+
+    const endpoints = endpointsList.length === 0 ? [`${controller}Create`, `${controller}Update`, `${controller}Fetch`, `${controller}Delete`]
+    : endpointsList
 
     const imports = endpoints.map(endpoint => {
         return `import { ${endpoint} } from './endpoints/${endpoint}';`
@@ -41,7 +44,9 @@ export const ${controller}Controller = [${endpoints.join(', ')}];
 
     fs.writeFileSync(`${controllerPath}/index.ts`, controllerIndex);
 
-    [`${controller}Create`, `${controller}Update`, `${controller}Fetch`, `${controller}Delete`].forEach(endpoint => {
+    
+
+    endpoints.forEach(endpoint => {
         const endpointPath = `${controllerPath}/endpoints/${endpoint}.ts`;
         const endpointContent = createEndpoint(controller, endpoint);
         fs.writeFileSync(endpointPath, endpointContent);

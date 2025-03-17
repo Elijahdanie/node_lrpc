@@ -19,14 +19,56 @@ program.command('help')
 program
     .command('create <controller>')
     .description('Create a controller')
-    .action(() => {
-        // push the latest microservice configuration to the server
+    .action(async () => {
+        // if(process.argv[3] === 'lrpc'){
+        //     console.log('Cannot create controller with name lrpc');
+        //     exit();
+        // }
 
-        // console.log(process.argv[3])
-        if(process.argv[3] === 'lrpc'){
-            console.log('Cannot create controller with name lrpc');
-            exit();
+        const { controllerName } = await inquirer.prompt([
+            {
+                type: 'input',
+                name: 'controllerName',
+                message: 'Enter controller name:',
+                validate: (input) => {
+                    if (!input.trim()) return 'Controller name cannot be empty!';
+                    if (input.toLowerCase() === 'lrpc') return 'Cannot create controller with name "lrpc"!';
+                    return true;
+                },
+            },
+        ]);
+
+        const { mode } = await inquirer.prompt([
+            {
+                type: 'list',
+                name: 'mode',
+                message: 'How do you want to create endpoints?',
+                choices: ['Manually', 'Automatically (CRUD)'],
+            },
+        ]);
+
+        let endpoints = [];
+
+        if (mode === 'Automatically (CRUD)') {
+            endpoints = [];
+            console.log(`\n✅ Bootstrapped CRUD endpoints: ${endpoints.join(', ')}`);
+        } else {
+            console.log(`\n👉 Enter endpoint names one by one. Press ENTER on an empty input to finish.`);
+            while (true) {
+                const { endpoint } = await inquirer.prompt([
+                    {
+                        type: 'input',
+                        name: 'endpoint',
+                        message: 'Enter endpoint name:',
+                    },
+                ]);
+                if (!endpoint.trim()) break;
+                endpoints.push(endpoint.trim());
+            }
         }
+
+        createController(controllerName, endpoints);
+
         createController(process.argv[3]);
         console.log('Created Controller');
         exit();
