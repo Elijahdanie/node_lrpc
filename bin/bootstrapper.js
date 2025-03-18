@@ -326,39 +326,79 @@ export {controllers, serviceClients};
 
 }
 
-const createUnitTests = (controller)=>{
+const createUnitTests = (controller) => {
     const endpointsPath = `./src/controllers/${controller}/endpoints`;
-    const endpoints = fs.readdirSync(endpointsPath).filter(f=>f !== '.DS_Store').map(f=>f.split('.')[0]);
+    const endpoints = fs.readdirSync(endpointsPath)
+        .filter(f => f !== '.DS_Store')
+        .map(f => f.split('.')[0]);
+
     const testPath = `./src/tests/${controller}.ts`;
-    if(!fs.existsSync('./src/tests')){
+
+    // Ensure tests directory exists
+    if (!fs.existsSync('./src/tests')) {
         fs.mkdirSync('./src/tests');
     }
-    console.log(__dirname);
-const testContent = `
-// modify import to specify the service
-import { ${controller} } from '../lrpc/clientsFE/${service}';
+
+    if (!fs.existsSync(testPath)) {
+        // First run: Create a new test file
+        console.log(`Creating new test file: ${testPath}`);
+
+        const imports = `import { ${controller} } from '../lrpc/clientsFE/${service}';\nimport { Status } from 'node_lrpc';`;
+
+        const testContent = `
+${imports}
 
 export const ${controller}Test = () => {
-    ${endpoints.map(endpoint=>{
-    return `
+    ${endpoints.map(endpoint => createTestBlock(controller, endpoint)).join('')}
+};
+        `;
+
+        fs.writeFileSync(testPath, testContent.trim());
+        console.log(`Test file created successfully!`);
+        return;
+    }
+
+    // If test file exists, update it
+    console.log(`Updating existing test file: ${testPath}`);
+
+    let fileContent = fs.readFileSync(testPath, 'utf8');
+
+    let existingTests = new Set(fileContent.match(/describe\('Testing the endpoint \w+'/g) || []);
+
+    endpoints.forEach(endpoint => {
+        const testBlockIdentifier = `describe('Testing the endpoint ${endpoint}'`;
+
+        if (!existingTests.has(testBlockIdentifier)) {
+            const insertPosition = fileContent.lastIndexOf('};');
+            fileContent = fileContent.slice(0, insertPosition) + createTestBlock(controller, endpoint) + fileContent.slice(insertPosition);
+        }
+    });
+
+    fs.writeFileSync(testPath, fileContent.trim());
+    console.log(`Test file updated successfully!`);
+};
+
+// Helper function to create a test block
+const createTestBlock = (controller, endpoint) => `
     describe('Testing the endpoint ${endpoint}', () => {
         
-        it("Should Do Something", async () => {
-
+        it("Validate ${endpoint}", async () => {
             const response = await ${controller}.${endpoint}({
                 // Add your test data here
             } as any);
+            expect(response.status).toBe<Status>('validationError');
+        });
 
-            expect(response.status).toBe('success');
-        })
-    })
-    `
-}).join('')}
-}
-`
+        it("Test ${endpoint}", async () => {
+            const response = await ${controller}.${endpoint}({
+                // Add your test data here
+            } as any);
+            expect(response.status).toBe<Status>('success');
+        });
+    });
+`;
 
-fs.writeFileSync(testPath, testContent);
-}
+
 
 module.exports = {
     createController,

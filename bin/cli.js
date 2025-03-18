@@ -144,6 +144,7 @@ program
         ]);
 
         resolveControllerIndex(controller, [endpoint], controllerPath);
+        createUnitTests(controller);
 
         console.log(`✅ Created endpoint: ${controller}/endpoints/${endpoint}.ts`);
     });
