@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 const commander = require('commander');
-const {createController, createEndpoint, generateRegistry, createUnitTests} = require('./bootstrapper');
+const {createController, createEndpoint, generateRegistry, createUnitTests, createRepository} = require('./bootstrapper');
 const { fetchScript } = require('./scriptRepository');
 const { exit } = require('process');
 const fs = require('fs');
@@ -123,6 +123,7 @@ program
         // Step 3: Create endpoint directory if it doesn't exist
         const controllerPath = path.join(controllersPath, controller);
         const endpointsDir = path.join(controllerPath, 'endpoints');
+        const repositoryPath = `${controllerPath}/${controller}Repository.ts`;
 
         if (!fs.existsSync(endpointsDir)) {
             fs.mkdirSync(endpointsDir);
@@ -137,6 +138,10 @@ program
 
         const endpointContent = createEndpoint(controller, endpoint);
         fs.writeFileSync(endpointPath, endpointContent);
+        // we need to input the implementation here
+        createRepository(controller, repositoryPath, [
+            endpoint
+        ]);
 
         console.log(`✅ Created endpoint: ${controller}/endpoints/${endpoint}.ts`);
     });
