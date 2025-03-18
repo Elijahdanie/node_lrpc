@@ -55,7 +55,7 @@ export const ${controller}Controller = [
     });
 
     const repositoryPath = `${controllerPath}/${controller}Repository.ts`;
-    createRepository(controller, repositoryPath, endpoints, endpoints);
+    createRepository(controller, repositoryPath, endpoints);
     generateRegistry();
     createUnitTests(controller);
 }
@@ -149,11 +149,49 @@ export class ${endpoint} implements HandlerConfig<${requestClass}, ${responseCla
 `
 }
 
-const createRepository = (controller, path, endpoints, imports) => {
-    let payloads = imports.map(endpoint => {
-        return `import { ${endpoint}Request, ${endpoint}Response } from './endpoints/${endpoint}';`
-    });
-    const repositoryContent = `
+// const createRepository = (controller, path, endpoints) => {
+//     let payloads = endpoints.map(endpoint => {
+//         return `import { ${endpoint}Request, ${endpoint}Response } from './endpoints/${endpoint}';`
+//     });
+//     const repositoryContent = `
+// ${payloads.join('\n')}
+// import { Service } from 'typedi';
+// import { prisma } from '../..';
+
+// @Service()
+// export default class ${controller}Repository {
+
+//         ${endpoints.map(endpoint => {
+//             return `
+//     ${endpoint} = async (data: ${endpoint}Request): Promise<${endpoint}Response> => {
+
+//         try {
+//             // Add your business logic here
+            
+//             return {} as ${endpoint}Response;
+//         } catch (error: any) {
+//             console.error(error);
+//             throw new Error(error.message);
+//         }
+//     }
+//             `
+//         }).join('')}
+// }
+// `
+//         fs.writeFileSync(path, repositoryContent);
+// }
+
+
+const createRepository = (controller, filePath, endpoints) => {
+    if (!fs.existsSync(filePath)) {
+        // First run: Create a new repository file
+        console.log(`Creating new repository: ${filePath}`);
+
+        let payloads = endpoints.map(endpoint => {
+            return `import { ${endpoint}Request, ${endpoint}Response } from './endpoints/${endpoint}';`;
+        });
+
+        const repositoryContent = `
 ${payloads.join('\n')}
 import { Service } from 'typedi';
 import { prisma } from '../..';
@@ -161,20 +199,65 @@ import { prisma } from '../..';
 @Service()
 export default class ${controller}Repository {
 
-        ${endpoints.map(endpoint => {
-            return `
+    ${endpoints.map(endpoint => `
     ${endpoint} = async (data: ${endpoint}Request): Promise<${endpoint}Response> => {
-        
-        // Add your business logic here
-        
-        return {} as ${endpoint}Response;
-    }
-            `
-        }).join('')}
-    }
-`
-        fs.writeFileSync(path, repositoryContent);
+        try {
+            // Add your business logic here
+            
+            return {} as ${endpoint}Response;
+        } catch (error: any) {
+            console.error(error);
+            throw new Error(error.message);
+        }
+    }`).join('\n')}
 }
+        `;
+
+        fs.writeFileSync(filePath, repositoryContent.trim());
+        console.log(`Repository created successfully!`);
+        return;
+    }
+
+    // If file exists, update it
+    console.log(`Updating existing repository: ${filePath}`);
+
+    let fileContent = fs.readFileSync(filePath, 'utf8');
+
+    let imports = new Set(fileContent.match(/import { .*? } from '.*?';/g) || []);
+
+    endpoints.forEach(endpoint => {
+        const importStatement = `import { ${endpoint}Request, ${endpoint}Response } from './endpoints/${endpoint}';`;
+
+        if (!imports.has(importStatement)) {
+            fileContent = importStatement + '\n' + fileContent;
+        }
+
+        // Check if function already exists
+        const functionRegex = new RegExp(`\\b${endpoint}\\s*=\\s*async`, 'g');
+
+        if (!functionRegex.test(fileContent)) {
+            const insertPosition = fileContent.lastIndexOf('}');
+            const newFunction = `
+    ${endpoint} = async (data: ${endpoint}Request): Promise<${endpoint}Response> => {
+        try {
+            // Add your business logic here
+            
+            return {} as ${endpoint}Response;
+        } catch (error: any) {
+            console.error(error);
+            throw new Error(error.message);
+        }
+    }
+            `;
+
+            fileContent = fileContent.slice(0, insertPosition) + newFunction + '\n' + fileContent.slice(insertPosition);
+        }
+    });
+
+    fs.writeFileSync(filePath, fileContent.trim());
+    console.log(`Repository updated successfully!`);
+};
+
 
 const generateRegistry = ()=>{
 const controllerPath = './src/controllers';
