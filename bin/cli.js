@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 const commander = require('commander');
-const {createController, createEndpoint, generateRegistry, createUnitTests, createRepository} = require('./bootstrapper');
+const {createController, createEndpoint, generateRegistry, createUnitTests, createRepository, resolveControllerIndex} = require('./bootstrapper');
 const { fetchScript } = require('./scriptRepository');
 const { exit } = require('process');
 const fs = require('fs');
@@ -142,6 +142,8 @@ program
         createRepository(controller, repositoryPath, [
             endpoint
         ]);
+
+        resolveControllerIndex(controller, [endpoint], controllerPath);
 
         console.log(`✅ Created endpoint: ${controller}/endpoints/${endpoint}.ts`);
     });

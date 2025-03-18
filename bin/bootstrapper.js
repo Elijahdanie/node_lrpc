@@ -32,20 +32,7 @@ const createController = (controller, endpointsList) => {
     const endpoints = endpointsList.length === 0 ? [`${controller}Create`, `${controller}Update`, `${controller}Fetch`, `${controller}Delete`]
     : endpointsList
 
-    const imports = endpoints.map(endpoint => {
-        return `import { ${endpoint} } from './endpoints/${endpoint}';`
-    });
-
-    const controllerIndex = `
-${imports.join('\n')}
-
-export const ${controller}Controller = [
-    ${endpoints.join(',\n\t')}
-];
-`
-
-    fs.writeFileSync(`${controllerPath}/index.ts`, controllerIndex);
-
+    resolveControllerIndex(controller, endpoints, controllerPath);
     
 
     endpoints.forEach(endpoint => {
@@ -59,6 +46,55 @@ export const ${controller}Controller = [
     generateRegistry();
     createUnitTests(controller);
 }
+
+
+const resolveControllerIndex = (controller, endpoints, controllerPath) => {
+    const filePath = `${controllerPath}/index.ts`;
+
+    if (!fs.existsSync(filePath)) {
+        // First run: Create the controller index file
+        console.log(`Creating new controller index: ${filePath}`);
+
+        const imports = endpoints.map(endpoint => `import { ${endpoint} } from './endpoints/${endpoint}';`);
+
+        const controllerIndex = `
+${imports.join('\n')}
+
+export const ${controller}Controller = [
+    ${endpoints.join(',\n\t')},
+];
+        `;
+
+        fs.writeFileSync(filePath, controllerIndex.trim());
+        console.log(`Controller index created successfully!`);
+        return;
+    }
+
+    // If file exists, update it
+    console.log(`Updating existing controller index: ${filePath}`);
+
+    let fileContent = fs.readFileSync(filePath, 'utf8');
+
+    let existingImports = new Set(fileContent.match(/import { .*? } from '.*?';/g) || []);
+    let existingEndpoints = new Set(fileContent.match(/\b\w+\b(?=\s*,|\s*\])/g) || []);
+
+    endpoints.forEach(endpoint => {
+        const importStatement = `import { ${endpoint} } from './endpoints/${endpoint}';`;
+
+        if (!existingImports.has(importStatement)) {
+            fileContent = importStatement + '\n' + fileContent;
+        }
+
+        if (!existingEndpoints.has(endpoint)) {
+            const insertPosition = fileContent.lastIndexOf(']');
+            fileContent = fileContent.slice(0, insertPosition) + `\t${endpoint},\n]`;
+        }
+    });
+
+    fs.writeFileSync(filePath, fileContent.trim());
+    console.log(`Controller index updated successfully!`);
+};
+
 
 const createEndpoint = (controller, endpoint) => {
 
@@ -329,5 +365,6 @@ module.exports = {
     createEndpoint,
     createRepository,
     generateRegistry,
-    createUnitTests
+    createUnitTests,
+    resolveControllerIndex
 }
