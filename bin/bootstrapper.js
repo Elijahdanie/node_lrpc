@@ -167,7 +167,7 @@ export class ${endpoint} implements HandlerConfig<${requestClass}, ${responseCla
         try {
             const response = await this._${repository}.${endpoint}(data.payload);
             return {
-                message: 'created successfully.',
+                message: '${endpoint} successfully.',
                 status: 'success',
                 data: response
             }
