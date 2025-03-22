@@ -31,7 +31,7 @@ const fetchScript = async (environment) => {
 
     const utils = `
 import axios from 'axios';
-import { LRPCEngine } from '@elijahdanie/lrpc';
+import { LRPCEngine } from 'node_lrpc';
 
 let urlCache:{
     [key: string]: string
@@ -107,7 +107,6 @@ export const formUpload = async (procedure: string, data: any, files: any[], hea
     fs.writeFileSync(utilsFile, utils);
     redis.disconnect();
 }
-
 
 const resolveServiceIndexFile = async (indexFile, allServices) => {
 
