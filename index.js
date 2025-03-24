@@ -105,8 +105,11 @@ class LRPCEngine {
       }
     });
     this.io.on("connection", async (socket) => {
-      const token = socket.handshake.query.token;
+      try {
+        console.log('CONNECT')
+        const token = socket.handshake.query.token;
       const path = socket.handshake.query.path;
+      const data = socket.handshake.query.path;
 
       if (!token) {
         socket.disconnect();
@@ -120,29 +123,40 @@ class LRPCEngine {
         return;
       }
 
-      if (this.clientSockets[authResponse.data.id]) {
-        this.clientSockets[authResponse.data.id].disconnect();
-      }
+      // if (this.clientSockets[authResponse.data.id]) {
+      //   this.clientSockets[authResponse.data.id].disconnect();
+      // }
 
-      this.clientSockets[authResponse.data.id] = socket;
+      // this.clientSockets[authResponse.data.id] = socket;
 
       const endpoint = this.handlers[path];
       const func = this.container.get(endpoint);
 
-      // if (func) {
-      await func.onSocket(authResponse.data.id, "connect");
-      // }
+      console.log(func, 'FUNC')
 
-      socket.on("message", async (data) => {
-        await func.onSocket(authResponse.data.id, "message", data);
-      });
+      socket.on(path, async (payload) => {
 
-      socket.on("disconnect", async () => {
-        delete this.clientSockets[authResponse.data.id];
-        await func.onSocket(authResponse.data.id, "disconnect");
-      });
+        const response = await func.handler({
+          request: {},
+          response: {},
+          payload: payload,
+          socketClient: {
+            send: async (data) => {
+              console.log(data, 'DATA')
+              socket.emit(path, data);
+            },
+            disconnect: async () => {
+              socket.disconnect();
+            }
+          },
+          context: authResponse.data
+        });
 
-      // invoke on connection
+        socket.emit(path, response);
+      })
+      } catch (error) {
+        console.log(error);
+      }
     });
 
     return server;

@@ -2,6 +2,7 @@ import { Request, Response, Express } from "express";
 // import { RabbitMq } from "./rabbitmq";
 import { Redis } from "ioredis";
 import { LRPCEventType } from './logging/event.d.ts';
+import { Socket } from "socket.io";
 
 
 /**
@@ -57,13 +58,13 @@ export interface HandlerConfig<T, U> {
    */
   handler: (data: LRPCRequest<T>) => Promise<BaseResponse<U>>;
 
-  /**
-   * This function is called when the socket is connected, disconnected or message received
-   * @param id The socket id
-   * @param status The status of the socket
-   * @param data The data received
-   */
-  onSocket?: (id: string, status: 'connect' | 'disconnect' | 'message', data?: any) => Promise<void>;
+  // /**
+  //  * This function is called when the socket is connected, disconnected or message received
+  //  * @param id The socket id
+  //  * @param status The status of the socket
+  //  * @param data The data received
+  //  */
+  // onSocket?: (id: string, status: 'connect' | 'disconnect' | 'message', data?: any) => Promise<void>;
 }
 
 /**
@@ -76,6 +77,17 @@ export interface File {
   mimetype: string;
   buffer: Buffer;
   size: number;
+}
+
+export interface ISocketHandler {
+
+  send: (data: {
+    message: string,
+    status: Status,
+    data?: any
+  }) => void;
+
+  disconnect: () => void;
 }
 
 /**
@@ -105,6 +117,11 @@ export interface LRPCRequest<T> {
    * The files uploaded by the user
    */
   files: File[];
+
+  /**
+   * The socket handler for socket endpoints
+   */
+  socket: ISocketHandler;
 
   /**
    * The context of the request
