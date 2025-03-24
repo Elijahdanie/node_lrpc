@@ -106,7 +106,6 @@ class LRPCEngine {
     });
     this.io.on("connection", async (socket) => {
       try {
-        console.log('CONNECT')
         const token = socket.handshake.query.token;
       const path = socket.handshake.query.path;
       const data = socket.handshake.query.path;
@@ -132,17 +131,14 @@ class LRPCEngine {
       const endpoint = this.handlers[path];
       const func = this.container.get(endpoint);
 
-      console.log(func, 'FUNC')
-
       socket.on(path, async (payload) => {
 
-        const response = await func.handler({
+        await func.handler({
           request: {},
           response: {},
-          payload: payload,
-          socketClient: {
+          payload,
+          socket: {
             send: async (data) => {
-              console.log(data, 'DATA')
               socket.emit(path, data);
             },
             disconnect: async () => {
@@ -152,7 +148,6 @@ class LRPCEngine {
           context: authResponse.data
         });
 
-        socket.emit(path, response);
       })
       } catch (error) {
         console.log(error);

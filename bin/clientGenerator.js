@@ -299,9 +299,12 @@ const createFEClient = (LRPC) => {
         }
     }
 
-    export const disconnectSocket = () => {
+    export const disconnectSocket = async () => {
         if(socket.connected){
+            socket.removeAllListeners();
             socket.disconnect();
+
+            await new Promise(resolve => setTimeout(resolve, 100));
         }
     }
 
@@ -312,14 +315,12 @@ const createFEClient = (LRPC) => {
 
     export const requestSocket = async (url: string, procedure: string, data: any, onMessage: (message: any, socket: ISocketHandler) => void) => {
         try {
-            console.log(url);
 
             if(!socket) {
                 socket = io(url, {
                     query: {
                         token: process.env.TOKEN,
-                        path: procedure,
-                        data
+                        path: procedure
                     }
                 });
             }
@@ -332,21 +333,17 @@ const createFEClient = (LRPC) => {
                         }
                     });
                 });
-
-                console.log('REGISTER');
             }
 
             if(!socket.connected) {
                 socket.connect();
-                console.log('CALLED CONNECT')
                 socket.on('connect', () => {
                     console.log('connected');
-                    // socket.emit(procedure, data);
+                    socket.emit(procedure, data);
                 });
             } else {
                 socket.emit(procedure, data);
             }
-            console.log('CONNECTED', socket.connected);
 
             }  catch(error) {
             return {
