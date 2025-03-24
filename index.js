@@ -105,7 +105,8 @@ class LRPCEngine {
       }
     });
     this.io.on("connection", async (socket) => {
-      const token = socket.handshake.query.token;
+      try {
+        const token = socket.handshake.query.token;
       const path = socket.handshake.query.path;
 
       if (!token) {
@@ -129,20 +130,27 @@ class LRPCEngine {
       const endpoint = this.handlers[path];
       const func = this.container.get(endpoint);
 
-      // if (func) {
-      await func.onSocket(authResponse.data.id, "connect");
-      // }
+      socket.on(path, async (payload) => {
 
-      socket.on("message", async (data) => {
-        await func.onSocket(authResponse.data.id, "message", data);
-      });
+        await func.handler({
+          request: {},
+          response: {},
+          payload,
+          socket: {
+            send: async (data) => {
+              socket.emit(path, data);
+            },
+            disconnect: async () => {
+              socket.disconnect();
+            }
+          },
+          context: authResponse.data
+        });
 
-      socket.on("disconnect", async () => {
-        delete this.clientSockets[authResponse.data.id];
-        await func.onSocket(authResponse.data.id, "disconnect");
-      });
-
-      // invoke on connection
+      })
+      } catch (error) {
+        console.log(error);
+      }
     });
 
     return server;
