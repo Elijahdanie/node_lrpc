@@ -1,6 +1,6 @@
 {
   "name": "node_lrpc",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "type": "commonjs",
   "description": "This package helps services communicate with each other using redis",
   "main": "index.js",
@@ -21,7 +21,7 @@
     "multer": "^1.4.5-lts.1",
     "prom-client": "^15.1.2",
     "reflect-metadata": "^0.2.2",
-    "socket.io": "^4.7.5",
+    "socket.io": "^4.8.1",
     "typedi": "^0.10.0"
   },
   "homepage": "https://github.com/Elijahdanie/node_lrpc#readme",
