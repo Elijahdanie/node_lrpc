@@ -38,9 +38,9 @@ const generateClientCode = (controllerName, className, methodName, request, resp
 
                 const dataKey = '${LRPC.service}.${controllerName}.${className}';
 
-                const response = ${!isSocket ? "await request(dataKey, data);":`await requestSocket("${process.env.SERVICEHOST.replace('/lrpc', '')}", dataKey, data, onMessage);`}
+                ${!isSocket ? "const response = await request(dataKey, data);":`await requestSocket("${process.env.SERVICEHOST.replace('/lrpc', '')}", dataKey, data, onMessage);`}
 
-                return response.data;
+                ${!isSocket ? 'return response.data;' : ''}
             } catch (error) {
                 return {
                     message: (error as any).message,
@@ -322,11 +322,7 @@ const createFEClient = (LRPC) => {
 
             if(!socket.hasListeners(procedure)){
                 socket.on(procedure, (data) => {
-                    onMessage(data, {
-                        disconnect: () => {
-                            socket.disconnect();
-                        }
-                    });
+                    onMessage(data);
                 });
             }
 
@@ -339,8 +335,6 @@ const createFEClient = (LRPC) => {
             } else {
                 socket.emit(procedure, data);
             }
-
-                return result;
             }  catch(error) {
             return {
                 data: {

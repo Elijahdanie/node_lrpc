@@ -421,10 +421,10 @@ declare function initLRPC(
   /**
    * socket config
    */
-  socketConfig?: {
-    onConnection: (socketServer, socketClient) => Promise<void>;
-    onDisconnection: (socketServer, socketClient, data) => Promise<void>;
-  }
+  // socketConfig?: {
+  //   onConnection: (socketServer, socketClient) => Promise<void>;
+  //   onDisconnection: (socketServer, socketClient, data) => Promise<void>;
+  // }
 ): LRPCEngine;
 
 /**

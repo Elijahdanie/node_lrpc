@@ -121,12 +121,6 @@ class LRPCEngine {
         return;
       }
 
-      if (this.clientSockets[authResponse.data.id]) {
-        this.clientSockets[authResponse.data.id].disconnect();
-      }
-
-      this.clientSockets[authResponse.data.id] = socket;
-
       const endpoint = this.handlers[path];
       const func = this.container.get(endpoint);
 
@@ -901,17 +895,17 @@ const initLRPC = (
   LRPC.eventManager.generateEvents();
 
   if (!parentPort) {
-    if (socketConfig) {
+    // if (socketConfig) {
       const server = LRPC.initSocket(app);
       server.listen(process.env.PORT, async () => {
         console.log(`Server/Websocket listening on port ${process.env.PORT}`);
         await Promise.all(sockcetHandlerPromises);
       });
-    } else {
-      app.listen(process.env.PORT, () => {
-        console.log(`Server listening on port ${process.env.PORT}`);
-      });
-    }
+    // } else {
+    //   app.listen(process.env.PORT, () => {
+    //     console.log(`Server listening on port ${process.env.PORT}`);
+    //   });
+    // }
   } else {
     Promise.all(sockcetHandlerPromises);
     // console.log(`Started service on thread ${workerData.id}`);
