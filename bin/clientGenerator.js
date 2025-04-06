@@ -332,6 +332,13 @@ const createFEClient = (LRPC) => {
                     console.log('connected');
                     socket.emit(procedure, data);
                 });
+                socket.on('disconnect', () => {
+                    console.log('disconnected');
+                    onMessage({
+                        message: 'DISCONNECTED',
+                        status: 'error'
+                    })
+                });
             } else {
                 socket.emit(procedure, data);
             }
