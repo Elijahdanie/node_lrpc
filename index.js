@@ -126,6 +126,27 @@ class LRPCEngine {
 
       socket.on(path, async (payload) => {
 
+        // verify the payload na
+        let isValid = { message: "", status: "" };
+        try {
+          isValid = await func.validator(payload);
+        } catch (error) {
+          console.log(error);
+          socket.emit(path, {
+            message: error.message,
+            status: "validationError",
+          });
+          return;
+        }
+  
+        if (isValid.status !== "success") {
+          socket.emit(path, {
+            message: isValid.message,
+            status: isValid.status,
+          });
+          return;
+        }
+
         await func.handler({
           request: {},
           response: {},
