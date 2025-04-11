@@ -81,6 +81,8 @@ export interface File {
 
 export interface ISocketHandler {
 
+  authorization: string;
+
   send: (data: {
     message: string,
     status: Status,

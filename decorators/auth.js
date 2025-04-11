@@ -77,6 +77,43 @@ const LRPCLimit = (model, query) => (target, propertyKey, descriptor) => {
     }
 }
 
+const LRPCCredit = (model, query) => (target, propertyKey, descriptor) => {
+  
+    const { userIdPropertyKey, creditsPropertyKey, limit } = query;
+    
+    const originalMethod = descriptor.value;
+  
+    descriptor.value = async function (...args) {
+  
+      const data = args[0];
+  
+      const userId = data.context.id;
+  
+      const sampleQuery = {
+        [userIdPropertyKey]: userId,
+        [creditsPropertyKey]: {
+          gt : limit
+        }
+      }
+  
+      const result = model.findFirst({
+        where: sampleQuery
+      });
+  
+      if(!result){
+        return {
+          message: 'You do not have sufficient credits',
+          status: 'restricted',
+        }
+      }
+  
+      const response = originalMethod.apply(this, args);
+  
+      return response;
+  
+    }
+  }
+
 
 const LRPCResource = (payloadKey) => (target, propertyKey, descriptor) => {
     if(!payloadKey){

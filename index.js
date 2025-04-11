@@ -152,6 +152,7 @@ class LRPCEngine {
           response: {},
           payload,
           socket: {
+            authorization: token,
             send: async (data) => {
               socket.emit(path, data);
             },
