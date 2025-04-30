@@ -31,7 +31,7 @@ const fetchScript = async (environment) => {
 
     const utils = `
 import axios from 'axios';
-import { LRPCEngine } from 'node_lrpc';
+import { LRPCEngine } from '@elijahdanie/lrpc';
 
 let urlCache:{
     [key: string]: string
